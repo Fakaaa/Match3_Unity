@@ -15,8 +15,8 @@ public class ScalerGridVisual : MonoBehaviour
 
         rect = gameObject.GetComponent<RectTransform>();
 
-        valueX = valueX * ((gridHandle.widthGridContainer / 10) + 0.25f);
-        valueY = valueY * ((gridHandle.heightGridContainer / 10) + 0.25f);
+        valueX = valueX * ((gridHandle.widthGridContainer / 10) + 0.5f);
+        valueY = valueY * ((gridHandle.heightGridContainer / 10) + 0.5f);
 
         rect.sizeDelta = new Vector2(valueX, valueY);
     }

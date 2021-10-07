@@ -214,8 +214,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d43c6ccbc943a8498ac6edb7f13cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPiecesX: 14
-  amountPiecesY: 10
+  amountPiecesX: 10
+  amountPiecesY: 9
   widthGridContainer: 40
   heightGridContainer: 25
 --- !u!114 &105643684
@@ -236,8 +236,8 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_StartCorner: 1
-  m_StartAxis: 1
+  m_StartCorner: 0
+  m_StartAxis: 0
   m_CellSize: {x: 4, y: 4}
   m_Spacing: {x: 1, y: 1}
   m_Constraint: 0
@@ -267,10 +267,11 @@ MonoBehaviour:
   generateWaterPieces: 1
   generateAirPieces: 1
   generateEarthPieces: 1
-  generateDarkPieces: 1
-  generateLightPieces: 1
+  generateDarkPieces: 0
+  generateLightPieces: 0
   generateIcePieces: 1
   generateLeafPieces: 1
+  minMatchAmount: 3
   piecesOnGrid: []
 --- !u!114 &105643686
 MonoBehaviour:
