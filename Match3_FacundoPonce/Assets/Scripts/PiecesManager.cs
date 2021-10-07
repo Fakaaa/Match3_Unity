@@ -18,13 +18,17 @@ public class PiecesManager : MonoBehaviour
     private List<int> indicesPiecesToSpawm;
 
     private GridManager grid;
-    private int maxAmountPieces = 60;
+    //private int maxAmountPieces = 60;
+    private int piecesX;
+    private int piecesY;
 
     private void Start()
     {
         grid = gameObject.GetComponent<GridManager>();
         indicesPiecesToSpawm = new List<int>();
-        Debug.Log("Amount áviable pieces= " + indicesPiecesToSpawm.Count);
+
+        piecesX = grid.amountPiecesX;
+        piecesY = grid.amountPiecesY;
 
         CheckTypePiecesToSpawn();
         GeneratePiecesGrid();
@@ -77,10 +81,18 @@ public class PiecesManager : MonoBehaviour
 
     public void GeneratePiecesGrid()
     {
-        for (int i = 0; i < maxAmountPieces; i++)
+        for (int i = 0; i < piecesX; i++)
         {
-            int pieceToSpawn = Random.Range(0, indicesPiecesToSpawm.Count);
-            piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[pieceToSpawn]], grid.transform));
+            for (int j = 0; j < piecesY; j++)
+            {
+                int pieceToSpawn = Random.Range(0, indicesPiecesToSpawm.Count);
+                piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[pieceToSpawn]], grid.transform));
+            }
         }
+        //for (int i = 0; i < maxAmountPieces; i++)
+        //{
+        //    int pieceToSpawn = Random.Range(0, indicesPiecesToSpawm.Count);
+        //    piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[pieceToSpawn]], grid.transform));
+        //}
     }
 }

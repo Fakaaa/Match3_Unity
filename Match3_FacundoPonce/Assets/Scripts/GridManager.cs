@@ -1,24 +1,33 @@
 using UnityEngine;
+using UnityEngine.UI;
 
-[ExecuteInEditMode]
 public class GridManager : MonoBehaviour
 {
     RectTransform gridContainer;
 
     [Header("SIZE GRID")]
-    [SerializeField][Range(30, 60)] public int widthGrid;
-    [SerializeField][Range(18, 36)] public int heightGrid;
+    [SerializeField][Range(5, 14)] public int amountPiecesX;
+    [SerializeField][Range(5, 10)] public int amountPiecesY;
+    
+    private GridLayoutGroup layoutGrid;
+
+    float fixOffsetX;
+    float fixOffsetY;
+
+    [HideInInspector] public int widthGridContainer;
+    [HideInInspector] public int heightGridContainer;
 
     void Start()
     {
+        layoutGrid = gameObject.GetComponent<GridLayoutGroup>();
         gridContainer = gameObject.GetComponent<RectTransform>();
-    }
 
-    private void Update()
-    {
-        if (gridContainer == null)
-            return;
+        fixOffsetX = layoutGrid.cellSize.x + layoutGrid.spacing.x;
+        fixOffsetY = layoutGrid.cellSize.y + layoutGrid.spacing.y;
 
-        gridContainer.sizeDelta = new Vector2(widthGrid, heightGrid);
+        widthGridContainer = (int)(amountPiecesX * fixOffsetX);
+        heightGridContainer = (int)(amountPiecesY * fixOffsetY);
+
+        gridContainer.sizeDelta = new Vector2(widthGridContainer, heightGridContainer);
     }
 }
