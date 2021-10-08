@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 1487673233628107273}
   - component: {fileID: 1487673233628107272}
   - component: {fileID: 6410961091798069783}
+  - component: {fileID: 2260514393261620717}
+  - component: {fileID: 2963614950588238842}
   m_Layer: 5
   m_Name: PieceAir
   m_TagString: Untagged
@@ -36,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 4, y: 4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1487673233628107273
 CanvasRenderer:
@@ -89,3 +91,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceType: 6
+  spawnAviable: 0
+--- !u!114 &2260514393261620717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487673233628107274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf6bf93fba48f84da97b3e77e6f3f30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pieceAnimator: {fileID: 2963614950588238842}
+--- !u!95 &2963614950588238842
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487673233628107274}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8e2c3ac500e98d94ba0cfa58462d7b2f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

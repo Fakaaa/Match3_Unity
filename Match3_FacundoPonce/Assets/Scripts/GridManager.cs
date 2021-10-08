@@ -7,7 +7,7 @@ public class GridManager : MonoBehaviour
 
     [Header("SIZE GRID")]
     [SerializeField][Range(5, 14)] public int amountPiecesX;
-    [SerializeField][Range(5, 10)] public int amountPiecesY;
+    [SerializeField][Range(5, 9)] public int amountPiecesY;
     
     [HideInInspector] public GridLayoutGroup layoutGrid;
 

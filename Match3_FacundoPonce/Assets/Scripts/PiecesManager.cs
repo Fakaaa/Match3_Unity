@@ -193,48 +193,46 @@ public class PiecesManager : MonoBehaviour
         return pieceToCreate;
     }
 
+    public void CreatePieceFromCondition(bool condition, int iteration)
+    {
+        if (condition)
+        {
+            PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[iteration].pieceType), grid.transform);
+            piecesOnGrid.Insert(indicesPrematches[iteration], newPiece);
+            piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[iteration]));
+            Destroy(preMatchesPieces[iteration].gameObject);
+        }
+    }
     public void NewPiecesHorizontal()
     {
-        //for (int i = 0; i < preMatchesPieces.Count; i++)
-        //{
-        //    PieceType piece = preMatchesPieces[i];
-        //    piece.GetComponent<Image>().color = Color.blue;
-        //}
-
         for (int i = 0; i < preMatchesPieces.Count; i++)
         {
-            if((i % 2) == 0)    //Rompe el match con una separacion par
-            {
-                PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
-                //newPiece.GetComponent<Image>().color = Color.red;
+            CreatePieceFromCondition(((i % 2) == 0), i); //Rompe el match con una separacion par
 
-                piecesOnGrid.Insert(indicesPrematches[i], newPiece);
-                piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
+            //if ((i % 2) == 0)    
+            //{
+            //    PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
+            //    piecesOnGrid.Insert(indicesPrematches[i], newPiece);
+            //    piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
 
-                Destroy(preMatchesPieces[i].gameObject);
-            }
+            //    Destroy(preMatchesPieces[i].gameObject);
+            //}
         }
     }
     public void NewPiecesVertical()
     {
-        //for (int i = 0; i < preMatchesPieces.Count; i++)
-        //{
-        //    PieceType piece = preMatchesPieces[i];
-        //    piece.GetComponent<Image>().color = Color.blue;
-        //}
-
         for (int i = 0; i < preMatchesPieces.Count; i++)
         {
-            if ((i % 2) != 0)    //Rompe el match con una separacion par
-            {
-                PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
-                //newPiece.GetComponent<Image>().color = Color.red;
+            CreatePieceFromCondition(((i % 2) != 0), i); //Rompe el match con una separacion inpar
 
-                piecesOnGrid.Insert(indicesPrematches[i], newPiece);
-                piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
+            //if ((i % 2) != 0)    
+            //{
+            //    PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
+            //    piecesOnGrid.Insert(indicesPrematches[i], newPiece);
+            //    piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
 
-                Destroy(preMatchesPieces[i].gameObject);
-            }
+            //    Destroy(preMatchesPieces[i].gameObject);
+            //}
         }
     }
 

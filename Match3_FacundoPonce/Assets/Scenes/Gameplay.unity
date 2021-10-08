@@ -236,7 +236,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -20}
   m_SizeDelta: {x: 40, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &105643681
@@ -289,8 +289,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d43c6ccbc943a8498ac6edb7f13cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPiecesX: 8
-  amountPiecesY: 6
+  amountPiecesX: 9
+  amountPiecesY: 9
   layoutGrid: {fileID: 0}
   widthGridContainer: 40
   heightGridContainer: 25
@@ -339,8 +339,8 @@ MonoBehaviour:
   - {fileID: 8297586922325359847, guid: 6cedd3d8d0faf5a49b5336943238a5a5, type: 3}
   - {fileID: 756619724243600356, guid: 82cd13746b5146a469ed83a0ee018751, type: 3}
   - {fileID: 1227863497584358547, guid: 6449e0b9d29011a4e97878f73c4982ee, type: 3}
-  generateFirePieces: 1
-  generateWaterPieces: 1
+  generateFirePieces: 0
+  generateWaterPieces: 0
   generateAirPieces: 1
   generateEarthPieces: 0
   generateDarkPieces: 0
@@ -1338,7 +1338,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -20}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1305803154
