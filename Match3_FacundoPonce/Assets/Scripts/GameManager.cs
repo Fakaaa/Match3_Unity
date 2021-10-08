@@ -50,6 +50,12 @@ public class GameManager : MonoBehaviour
         updateScoreAmount?.Invoke(scorePlayer);
     }
 
+    public void IncreaceScoreMultipler(int multiplerPieces)
+    {
+        scorePlayer += scoreEarnByMatch * multiplerPieces;
+        updateScoreAmount?.Invoke(scorePlayer);
+    }
+
     private void Start()
     {
         updateTurnsAmount?.Invoke(amountTurns);

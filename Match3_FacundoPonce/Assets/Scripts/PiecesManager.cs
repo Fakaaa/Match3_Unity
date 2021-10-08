@@ -4,6 +4,31 @@ using UnityEngine.UI;
 
 public class PiecesManager : MonoBehaviour
 {
+    #region Singleton
+
+    static PiecesManager instance;
+    public static PiecesManager Instance
+    {
+        get
+        {
+            if (instance == null)
+                instance = FindObjectOfType<PiecesManager>();
+
+            return instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if(instance != null)
+        {
+            Destroy(gameObject);
+        }
+        instance = this;
+    }
+
+    #endregion
+
     [Header("PIECES GENERATION")]
     [SerializeField] public List<PieceType> prefabsPieces;
     [SerializeField] public bool generateFirePieces;
@@ -29,9 +54,15 @@ public class PiecesManager : MonoBehaviour
 
     private int indexLastPieceCreated =0;
 
+    private Stack<PieceType> matchingPieces;
+    public bool chainBegin;
+
     private void Start()
     {
+        chainBegin = false;
+
         grid = gameObject.GetComponent<GridManager>();
+        matchingPieces = new Stack<PieceType>();
         indicesPiecesToSpawm = new List<int>();
 
         indicesPrematches = new List<int>();
@@ -46,13 +77,15 @@ public class PiecesManager : MonoBehaviour
         {
             GeneratePiecesGrid();
             for(int i=0; i< 5; i++) //Cinco veces para asegurarnos
-                FilterMatchesOnGrid();
+                FilterPreMatchesOnGrid();
         }
         else
         {
             GenerateGrid2Colors();
         }
     }
+
+    #region Clear and Filter Pre-Mathces before starts gameplay
 
     public void CheckTypePiecesToSpawn()
     {
@@ -108,14 +141,14 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
-    public void FilterMatchesOnGrid()
+    public void FilterPreMatchesOnGrid()
     {
         //HORIZONTAL FILTER
         for (int i = 0; i < piecesOnGrid.Count; i++)
         {
             CheckHorizontalMatchRecursive(i);
 
-            if(CheckIfThereIsMatch())
+            if(CheckIfThereIsPreMatch())
             {
                 NewPiecesHorizontal();
             }
@@ -128,7 +161,7 @@ public class PiecesManager : MonoBehaviour
         {
             CheckVerticalMatchRecursive(i);
 
-            if (CheckIfThereIsMatch())
+            if (CheckIfThereIsPreMatch())
             {
                 NewPiecesVertical();
             }
@@ -203,40 +236,24 @@ public class PiecesManager : MonoBehaviour
             Destroy(preMatchesPieces[iteration].gameObject);
         }
     }
+    
     public void NewPiecesHorizontal()
     {
         for (int i = 0; i < preMatchesPieces.Count; i++)
         {
             CreatePieceFromCondition(((i % 2) == 0), i); //Rompe el match con una separacion par
-
-            //if ((i % 2) == 0)    
-            //{
-            //    PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
-            //    piecesOnGrid.Insert(indicesPrematches[i], newPiece);
-            //    piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
-
-            //    Destroy(preMatchesPieces[i].gameObject);
-            //}
         }
     }
+    
     public void NewPiecesVertical()
     {
         for (int i = 0; i < preMatchesPieces.Count; i++)
         {
             CreatePieceFromCondition(((i % 2) != 0), i); //Rompe el match con una separacion inpar
-
-            //if ((i % 2) != 0)    
-            //{
-            //    PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
-            //    piecesOnGrid.Insert(indicesPrematches[i], newPiece);
-            //    piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
-
-            //    Destroy(preMatchesPieces[i].gameObject);
-            //}
         }
     }
 
-    public bool CheckIfThereIsMatch()
+    public bool CheckIfThereIsPreMatch()
     {
         if (preMatchesPieces.Count >= minMatchAmount)
             return true;
@@ -283,5 +300,255 @@ public class PiecesManager : MonoBehaviour
     public void ClearPreMatches()
     {
         preMatchesPieces.Clear();
+    }
+    
+    #endregion
+
+
+    public bool IsChainStarting()
+    {
+        if (chainBegin && matchingPieces.Count >= 1)
+            return true;
+        else 
+            return false;
+    }
+
+    public void StartChain(PieceType piece)
+    {
+        if(!chainBegin)
+        {
+            chainBegin = true;
+            matchingPieces.Push(piece);
+        }
+    }
+
+    public bool AddPieceToChain(PieceType piece)
+    {
+        if (!matchingPieces.Contains(piece))
+        {
+            if (CheckPieceDirection(piece))
+            {
+                matchingPieces.Push(piece);
+                return true;
+            }
+            else
+            {
+                if (matchingPieces.Count <= 1)
+                {
+                    Debug.Log("You are hovering a lonly piece.");
+                    EndChain();
+                    return false;
+                }
+                else
+                {
+                    matchingPieces.Push(piece);
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            matchingPieces.Pop();
+            return false;
+        }
+    }
+
+    public void RemovePieceFromChain(PieceType piece)
+    {
+
+    }
+
+    public bool EndChain()
+    {
+        if(matchingPieces.Count >= minMatchAmount)
+        {
+            //Match!
+            GameManager.Instance.DecreaseTurns();
+            GameManager.Instance.IncreaceScoreMultipler(matchingPieces.Count);
+            chainBegin = false;
+            matchingPieces.Clear();
+
+            return true;
+        }
+        else
+        {
+            //No Match!
+            GameManager.Instance.DecreaseTurns();
+            chainBegin = false;
+            matchingPieces.Clear();
+            
+            return false;
+        }
+    }
+
+    public bool CheckPieceDirection(PieceType piece)
+    {
+        PieceType pieceOnList = piecesOnGrid.Find(pieceFinded => pieceFinded == piece);
+
+        if (pieceOnList == null)
+            return false;
+        else
+        {
+            int indexPieceOnList = piecesOnGrid.IndexOf(pieceOnList);
+
+            if (MatchDirectionUp(indexPieceOnList) || MatchDirectionDown(indexPieceOnList) ||
+                MatchDirectionLeft(indexPieceOnList) || MatchDirectionRight(indexPieceOnList) ||
+                MatchDirectionUpRight(indexPieceOnList) || MatchDirectionUpLeft(indexPieceOnList) ||
+                MatchDirectionDownRight(indexPieceOnList) || MatchDirectionDownLeft(indexPieceOnList))
+                return true;
+            else
+                return false;
+        }
+    }
+    public bool MatchDirectionUp(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index - piecesX > 0 && piecesOnGrid[index - piecesX] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index - piecesX]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index - piecesX].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public bool MatchDirectionDown(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index + piecesX < piecesOnGrid.Count-1 && piecesOnGrid[index + piecesX] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index + piecesX]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index + piecesX].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public bool MatchDirectionLeft(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index - 1 > 0 && piecesOnGrid[index - 1] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index - 1]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index - 1].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+    
+    public bool MatchDirectionRight(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index + 1 < piecesOnGrid.Count-1 && piecesOnGrid[index + 1] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index + 1]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index + 1].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public bool MatchDirectionUpRight(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index - (piecesX + 1) > 0 && piecesOnGrid[index - (piecesX + 1)] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index - (piecesX + 1)]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index - (piecesX + 1)].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public bool MatchDirectionUpLeft(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index - (piecesX - 1) > 0 && piecesOnGrid[index - (piecesX - 1)] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index - (piecesX - 1)]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index - (piecesX - 1)].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public bool MatchDirectionDownRight(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index + (piecesX + 1) < piecesOnGrid.Count-1 && piecesOnGrid[index + (piecesX + 1)] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index + (piecesX + 1)]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index + (piecesX + 1)].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+    
+    public bool MatchDirectionDownLeft(int index)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            if (index + (piecesX - 1) < piecesOnGrid.Count-1 && piecesOnGrid[index + (piecesX - 1)] != null)
+            {
+                if (matchingPieces.Contains(piecesOnGrid[index + (piecesX - 1)]) &&
+                    piecesOnGrid[index].pieceType == piecesOnGrid[index + (piecesX - 1)].pieceType)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
     }
 }
