@@ -45,7 +45,8 @@ public class PiecesManager : MonoBehaviour
         if(indicesPiecesToSpawm.Count > 2)
         {
             GeneratePiecesGrid();
-            FilterHorizontalMatches();
+            for(int i=0; i< 5; i++) //Cinco veces para asegurarnos
+                FilterMatchesOnGrid();
         }
         else
         {
@@ -107,16 +108,29 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
-    public void FilterHorizontalMatches()
+    public void FilterMatchesOnGrid()
     {
+        //HORIZONTAL FILTER
         for (int i = 0; i < piecesOnGrid.Count; i++)
         {
-            CheckRightRecur(i);
+            CheckHorizontalMatchRecursive(i);
 
             if(CheckIfThereIsMatch())
             {
-                Debug.Log("Match At " + piecesOnGrid[i].name + " INDEX="+ i);
-                RemplaceWithNewPieces();
+                NewPiecesHorizontal();
+            }
+
+            ClearPreMatches();
+        }
+
+        //VERTICAL FILTER
+        for (int i = 0; i < piecesOnGrid.Count; i++)
+        {
+            CheckVerticalMatchRecursive(i);
+
+            if (CheckIfThereIsMatch())
+            {
+                NewPiecesVertical();
             }
 
             ClearPreMatches();
@@ -179,19 +193,47 @@ public class PiecesManager : MonoBehaviour
         return pieceToCreate;
     }
 
-    public void RemplaceWithNewPieces()
+    public void NewPiecesHorizontal()
     {
+        //for (int i = 0; i < preMatchesPieces.Count; i++)
+        //{
+        //    PieceType piece = preMatchesPieces[i];
+        //    piece.GetComponent<Image>().color = Color.blue;
+        //}
+
         for (int i = 0; i < preMatchesPieces.Count; i++)
         {
             if((i % 2) == 0)    //Rompe el match con una separacion par
             {
                 PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
+                //newPiece.GetComponent<Image>().color = Color.red;
 
                 piecesOnGrid.Insert(indicesPrematches[i], newPiece);
-                piecesOnGrid.Remove(piecesOnGrid.Find(x => x == preMatchesPieces[i]));
+                piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
 
                 Destroy(preMatchesPieces[i].gameObject);
-                //preMatchesPieces[i].gameObject.SetActive(false);
+            }
+        }
+    }
+    public void NewPiecesVertical()
+    {
+        //for (int i = 0; i < preMatchesPieces.Count; i++)
+        //{
+        //    PieceType piece = preMatchesPieces[i];
+        //    piece.GetComponent<Image>().color = Color.blue;
+        //}
+
+        for (int i = 0; i < preMatchesPieces.Count; i++)
+        {
+            if ((i % 2) != 0)    //Rompe el match con una separacion par
+            {
+                PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
+                //newPiece.GetComponent<Image>().color = Color.red;
+
+                piecesOnGrid.Insert(indicesPrematches[i], newPiece);
+                piecesOnGrid.Remove(piecesOnGrid.Find(pieceToFind => pieceToFind == preMatchesPieces[i]));
+
+                Destroy(preMatchesPieces[i].gameObject);
             }
         }
     }
@@ -204,22 +246,37 @@ public class PiecesManager : MonoBehaviour
             return false;
     }
 
-    //Derecha
-    public void CheckRightRecur(int initialIteration)
+    public void CheckHorizontalMatchRecursive(int initialIteration)
     {
         if (piecesOnGrid[initialIteration] != null)
         {
             preMatchesPieces.Add(piecesOnGrid[initialIteration]);
             indicesPrematches.Add(initialIteration);
 
-            if(initialIteration + 1 < piecesOnGrid.Count)
+            if(initialIteration + 1 < piecesOnGrid.Count)//Horizontal
             {
                 if (piecesOnGrid[initialIteration + 1] != null)
                 {
                     if (piecesOnGrid[initialIteration + 1].pieceType == piecesOnGrid[initialIteration].pieceType)
-                        CheckRightRecur(initialIteration + 1);
-                    else
-                        return;
+                        CheckHorizontalMatchRecursive(initialIteration + 1);
+                }
+            }
+        }
+    }
+
+    public void CheckVerticalMatchRecursive(int initialIteration)
+    {
+        if(piecesOnGrid[initialIteration] != null)
+        {
+            preMatchesPieces.Add(piecesOnGrid[initialIteration]);
+            indicesPrematches.Add(initialIteration);
+
+            if (initialIteration + piecesX < piecesOnGrid.Count)//Vertical
+            {
+                if (piecesOnGrid[initialIteration + piecesX] != null)
+                {
+                    if (piecesOnGrid[initialIteration + piecesX].pieceType == piecesOnGrid[initialIteration].pieceType)
+                        CheckVerticalMatchRecursive(initialIteration + piecesX);
                 }
             }
         }
