@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -32,4 +30,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] public int amountTurns;
     [SerializeField] public int pointsPlayer;
 
+    public delegate void TurnsUpdate(int amount);
+    public TurnsUpdate updateTurnsAmount;
+
+    public void DecreaseTurns()
+    {
+        amountTurns--;
+        updateTurnsAmount?.Invoke(amountTurns);
+    }
+
+    private void Start()
+    {
+        updateTurnsAmount?.Invoke(amountTurns);
+    }
 }
