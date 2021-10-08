@@ -57,10 +57,4 @@ public class PieceController : MonoBehaviour, IPointerDownHandler, IPointerEnter
     {
         piece = GetComponent<PieceType>();
     }
-
-    void Update()
-    {
-        
-    }
-
 }
