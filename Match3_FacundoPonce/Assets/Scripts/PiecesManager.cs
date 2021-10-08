@@ -324,6 +324,7 @@ public class PiecesManager : MonoBehaviour
         {
             chainBegin = true;
             matchingPieces.Push(piece);
+            Debug.Log("Stacked!");
             int indexPieceOnList = piecesOnGrid.IndexOf(piece);
             CalcValuesIndexDirectionPreChain(indexPieceOnList);
         }
@@ -336,35 +337,45 @@ public class PiecesManager : MonoBehaviour
             if (CheckMatchWithStack(piece))
             {
                 matchingPieces.Push(piece);
+                Debug.Log("Stacked!");
                 return true;
             }
             else
             {
-                EndChain();
+                //EndChain();
                 return false;
             }
         }
-        else
-        {
-            //VOLVER ATRAS
-            //matchingPieces.Pop();
-            return false;
-        }
+
+        return false;
     }
 
     public void RemovePieceFromChain(PieceType piece)
     {
+        if (matchingPieces.Count <= 0)
+            return;
 
+        PieceController peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceController>();
+        if (peekPieceOnStack == null || piece.gameObject.GetInstanceID() == peekPieceOnStack.gameObject.GetInstanceID())
+            return;
+
+        if (matchingPieces.Contains(piece)) //Verifico si la pieza actual esta dentro del stack, si lo esta quito el ultimo push
+        {
+            peekPieceOnStack.RemoveFromChain();
+            matchingPieces.Pop();
+            Debug.Log("Unstacked!");
+        }
     }
 
     public bool EndChain()
     {
+        chainBegin = false;
+        
         if (matchingPieces.Count >= minMatchAmount)
         {
             //Match!
             GameManager.Instance.DecreaseTurns();
             GameManager.Instance.IncreaceScoreMultipler(matchingPieces.Count);
-            chainBegin = false;
             matchingPieces.Clear();
 
             return true;
@@ -373,7 +384,6 @@ public class PiecesManager : MonoBehaviour
         {
             //No Match!
             GameManager.Instance.DecreaseTurns();
-            chainBegin = false;
             matchingPieces.Clear();
 
             return false;

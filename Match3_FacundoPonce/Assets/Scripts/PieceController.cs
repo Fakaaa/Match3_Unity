@@ -31,8 +31,11 @@ public class PieceController : MonoBehaviour, IPointerDownHandler, IPointerEnter
         {
             if(PiecesManager.Instance.AddPieceToChain(piece))
             {
-                pieceAnimator.SetBool("Hover", false);
-                pieceAnimator.SetBool("Drag", true);
+                AddToChain();
+            }
+            else
+            {
+                PiecesManager.Instance.RemovePieceFromChain(piece);
             }
         }
     }
@@ -56,5 +59,23 @@ public class PieceController : MonoBehaviour, IPointerDownHandler, IPointerEnter
     void Start()
     {
         piece = GetComponent<PieceType>();
+    }
+
+    public void RemoveFromChain()
+    {
+        if (pieceAnimator == null)
+            return;
+
+        pieceAnimator.SetBool("Hover", false);
+        pieceAnimator.SetBool("Drag", false);
+    }
+
+    public void AddToChain()
+    {
+        if (pieceAnimator == null)
+            return;
+
+        pieceAnimator.SetBool("Hover", false);
+        pieceAnimator.SetBool("Drag", true);
     }
 }
