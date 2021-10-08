@@ -28,10 +28,15 @@ public class GameManager : MonoBehaviour
     #endregion
 
     [SerializeField] public int amountTurns;
-    [SerializeField] public int pointsPlayer;
+    [SerializeField] public int scorePlayer;
+
+    [SerializeField] public int scoreEarnByMatch;
 
     public delegate void TurnsUpdate(int amount);
     public TurnsUpdate updateTurnsAmount;
+
+    public delegate void ScoreUpdate(int amount);
+    public ScoreUpdate updateScoreAmount;
 
     public void DecreaseTurns()
     {
@@ -39,8 +44,23 @@ public class GameManager : MonoBehaviour
         updateTurnsAmount?.Invoke(amountTurns);
     }
 
+    public void IncreaceScore()
+    {
+        scorePlayer += scoreEarnByMatch;
+        updateScoreAmount?.Invoke(scorePlayer);
+    }
+
     private void Start()
     {
         updateTurnsAmount?.Invoke(amountTurns);
+        updateScoreAmount?.Invoke(scorePlayer);
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            IncreaceScore();
+        }
     }
 }
