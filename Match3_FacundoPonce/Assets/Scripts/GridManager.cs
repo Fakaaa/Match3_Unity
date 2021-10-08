@@ -9,7 +9,7 @@ public class GridManager : MonoBehaviour
     [SerializeField][Range(5, 14)] public int amountPiecesX;
     [SerializeField][Range(5, 10)] public int amountPiecesY;
     
-    private GridLayoutGroup layoutGrid;
+    [HideInInspector] public GridLayoutGroup layoutGrid;
 
     float fixOffsetX;
     float fixOffsetY;

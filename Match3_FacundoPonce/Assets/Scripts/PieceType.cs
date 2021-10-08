@@ -5,7 +5,7 @@ using UnityEngine;
 public class PieceType : MonoBehaviour
 {
     [SerializeField]
-    public enum TypePiece { Fire,Water,Earth,Light,Dark,Leaf,Air,Ice}
+    public enum TypePiece { Fire,Water,Earth,Light,Dark,Leaf,Air,Ice, None}
     public TypePiece pieceType;
     [HideInInspector] public bool spawnAviable;
 }

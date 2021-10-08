@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PiecesManager : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class PiecesManager : MonoBehaviour
     private int piecesX;
     private int piecesY;
 
+    private int indexLastPieceCreated =0;
+
     private void Start()
     {
         grid = gameObject.GetComponent<GridManager>();
@@ -38,8 +41,16 @@ public class PiecesManager : MonoBehaviour
         piecesY = grid.amountPiecesY;
 
         CheckTypePiecesToSpawn();
-        GeneratePiecesGrid();
-        FilterHorizontalMatches();
+
+        if(indicesPiecesToSpawm.Count > 2)
+        {
+            GeneratePiecesGrid();
+            FilterHorizontalMatches();
+        }
+        else
+        {
+            GenerateGrid2Colors();
+        }
     }
 
     public void CheckTypePiecesToSpawn()
@@ -89,13 +100,10 @@ public class PiecesManager : MonoBehaviour
 
     public void GeneratePiecesGrid()
     {
-        for (int i = 0; i < piecesX; i++)
+        for (int i = 0; i < piecesX * piecesY; i++)
         {
-            for (int j = 0; j < piecesY; j++)
-            {
-                int pieceToSpawn = Random.Range(0, indicesPiecesToSpawm.Count);
-                piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[pieceToSpawn]], grid.transform));
-            }
+            int pieceToSpawn = Random.Range(0, indicesPiecesToSpawm.Count);
+            piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[pieceToSpawn]], grid.transform));
         }
     }
 
@@ -107,6 +115,7 @@ public class PiecesManager : MonoBehaviour
 
             if(CheckIfThereIsMatch())
             {
+                Debug.Log("Match At " + piecesOnGrid[i].name + " INDEX="+ i);
                 RemplaceWithNewPieces();
             }
 
@@ -114,20 +123,58 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
+    public void GenerateGrid2Colors()
+    {
+        for (int i = 0; i < piecesY; i++)
+        {
+            for (int j = 0; j < piecesX; j++)
+            {
+                if (i % 2 == 0)
+                {
+                    if(j % 2 == 0)
+                        piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[0]], grid.transform));
+                    else
+                        piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[1]], grid.transform));
+                }
+                else
+                {
+                    if (j % 2 != 0)
+                        piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[0]], grid.transform));
+                    else
+                        piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[1]], grid.transform));
+                }
+
+            }
+        }
+    }
+
     public PieceType CreateDifferentPiece(PieceType.TypePiece piece)
     {
         PieceType pieceToCreate = null;
+        int indexToEvade = 0;
+
         for (int i = 0; i < prefabsPieces.Count; i++)
         {
-            if(prefabsPieces[i].spawnAviable)
+            if (prefabsPieces[i].spawnAviable)
             {
-                if(prefabsPieces[i].pieceType != piece)
+                if (prefabsPieces[i].pieceType == piece)
                 {
-                    pieceToCreate = prefabsPieces[i];
-                    break;
+                    indexToEvade = i;
                 }
             }
         }
+        int randIndex = 0;
+        int randomPiece = 0;
+        do
+        {
+            randIndex = Random.Range(0, indicesPiecesToSpawm.Count);
+
+        } while (indicesPiecesToSpawm[randIndex] == indexToEvade || indicesPiecesToSpawm[randIndex] == indexLastPieceCreated);
+
+        randomPiece = indicesPiecesToSpawm[randIndex];
+        pieceToCreate = prefabsPieces[randomPiece];
+
+        indexLastPieceCreated = randomPiece;
 
         return pieceToCreate;
     }
@@ -138,9 +185,13 @@ public class PiecesManager : MonoBehaviour
         {
             if((i % 2) == 0)    //Rompe el match con una separacion par
             {
-                piecesOnGrid.RemoveAt(indicesPrematches[i]);
-                piecesOnGrid.Insert(indicesPrematches[i], Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), preMatchesPieces[i].transform.position, Quaternion.identity));
-                Destroy(preMatchesPieces[i]);
+                PieceType newPiece = Instantiate(CreateDifferentPiece(preMatchesPieces[i].pieceType), grid.transform);
+
+                piecesOnGrid.Insert(indicesPrematches[i], newPiece);
+                piecesOnGrid.Remove(piecesOnGrid.Find(x => x == preMatchesPieces[i]));
+
+                Destroy(preMatchesPieces[i].gameObject);
+                //preMatchesPieces[i].gameObject.SetActive(false);
             }
         }
     }
