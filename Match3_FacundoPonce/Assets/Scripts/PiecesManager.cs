@@ -324,7 +324,6 @@ public class PiecesManager : MonoBehaviour
         {
             chainBegin = true;
             matchingPieces.Push(piece);
-            Debug.Log("Stacked!");
             int indexPieceOnList = piecesOnGrid.IndexOf(piece);
             CalcValuesIndexDirectionPreChain(indexPieceOnList);
         }
@@ -337,12 +336,10 @@ public class PiecesManager : MonoBehaviour
             if (CheckMatchWithStack(piece))
             {
                 matchingPieces.Push(piece);
-                Debug.Log("Stacked!");
                 return true;
             }
             else
             {
-                //EndChain();
                 return false;
             }
         }
@@ -363,7 +360,6 @@ public class PiecesManager : MonoBehaviour
         {
             peekPieceOnStack.RemoveFromChain();
             matchingPieces.Pop();
-            Debug.Log("Unstacked!");
         }
     }
 
@@ -376,7 +372,8 @@ public class PiecesManager : MonoBehaviour
             //Match!
             GameManager.Instance.DecreaseTurns();
             GameManager.Instance.IncreaceScoreMultipler(matchingPieces.Count);
-            matchingPieces.Clear();
+
+            HandlePiecesAfterMatch();
 
             return true;
         }
@@ -387,6 +384,19 @@ public class PiecesManager : MonoBehaviour
             matchingPieces.Clear();
 
             return false;
+        }
+    }
+
+    void HandlePiecesAfterMatch()
+    {
+        int amountMatchPieces = matchingPieces.Count;
+        for (int i = 0; i < amountMatchPieces; i++)
+        {
+            PieceType newPiece = Instantiate(CreateDifferentPiece(matchingPieces.Peek().pieceType), grid.transform);
+            piecesOnGrid.Add(newPiece);
+            piecesOnGrid.Remove(matchingPieces.Peek());
+            Destroy(matchingPieces.Peek().gameObject);
+            matchingPieces.Pop();
         }
     }
 
