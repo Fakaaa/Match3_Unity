@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,23 +46,30 @@ public class PiecesManager : MonoBehaviour
     [SerializeField] public int minMatchAmount;
     [SerializeField] public List<PieceType> piecesOnGrid;
 
-    private List<PieceType> preMatchesPieces;
-    private List<int> indicesPrematches;
-
-    private GridManager grid;
-    private int piecesX;
-    private int piecesY;
-
-    private int indexLastPieceCreated = 0;
-
-    private Stack<PieceType> matchingPieces;
-    private int[] indexDirectionsStackPeek;
-    private int directions = 8;
+    public bool piecesGenerated;
     public bool chainBegin;
+    public int piecesCreated;
+
+    [SerializeField] Animator allGridAnimator;
+
+    List<PieceType> preMatchesPieces;
+    List<int> indicesPrematches;
+
+    GridManager grid;
+    int piecesX;
+    int piecesY;
+
+    int indexLastPieceCreated = 0;
+
+    Stack<PieceType> matchingPieces;
+    int[] indexDirectionsStackPeek;
+    int directions = 8;
 
     private void Start()
     {
+        piecesCreated = 0;
         chainBegin = false;
+        piecesGenerated = false;
 
         grid = gameObject.GetComponent<GridManager>();
         matchingPieces = new Stack<PieceType>();
@@ -76,18 +84,60 @@ public class PiecesManager : MonoBehaviour
         piecesY = grid.amountPiecesY;
 
         CheckTypePiecesToSpawn();
+    }
 
-        if (indicesPiecesToSpawm.Count > 2)
+    private void Update()
+    {
+        if(!piecesGenerated)
         {
-            GeneratePiecesGrid();
-            for (int i = 0; i < 5; i++) //Cinco veces para asegurarnos
-                FilterPreMatchesOnGrid();
-            //piecesOnGrid.Sort();
+            if(allGridAnimator != null)
+            {
+                if(allGridAnimator.GetBool("ResetGrid"))
+                {
+                    allGridAnimator.SetBool("ResetGrid", false);
+                }
+            }
+
+            if (indicesPiecesToSpawm.Count > 2)
+            {
+                StartCoroutine(GeneratePiecesCorutine());
+
+                for (int i = 0; i < 5; i++) //Cinco veces para asegurarnos
+                    FilterPreMatchesOnGrid();
+            }
+            else
+            {
+                GenerateGrid2Colors();
+            }
+            piecesGenerated = true;
         }
-        else
+    }
+
+    public IEnumerator GeneratePiecesCorutine()
+    {
+        while (piecesCreated < piecesX * piecesY)
         {
-            GenerateGrid2Colors();
+            int pieceToSpawn = Random.Range(0, indicesPiecesToSpawm.Count);
+            piecesOnGrid.Add(Instantiate(prefabsPieces[indicesPiecesToSpawm[pieceToSpawn]], grid.transform));
+            piecesCreated++;
+
+            yield return new WaitForEndOfFrame();
         }
+        yield return null;
+    }
+
+    public void ResetTheGridPieces()
+    {
+        piecesCreated = 0;
+        chainBegin = false;
+
+        for (int i = 0; i < piecesX * piecesY; i++)
+        {
+            Destroy(piecesOnGrid[i].gameObject);
+        }
+
+        piecesOnGrid.Clear();
+        piecesGenerated = false;
     }
 
     #region Clear and Filter Pre-Mathces before starts gameplay

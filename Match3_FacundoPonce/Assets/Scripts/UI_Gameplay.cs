@@ -14,6 +14,7 @@ public class UI_Gameplay : MonoBehaviour
         {
             GameManager.Instance.updateTurnsAmount += UpdateTurns;
             GameManager.Instance.updateScoreAmount += UpdatePoints;
+            GameManager.Instance.isMatchEnded += ShowEndScreen; 
         }
     }
 
@@ -23,6 +24,7 @@ public class UI_Gameplay : MonoBehaviour
         {
             GameManager.Instance.updateTurnsAmount -= UpdateTurns;
             GameManager.Instance.updateScoreAmount -= UpdatePoints;
+            GameManager.Instance.isMatchEnded -= ShowEndScreen;
         }
     }
 
