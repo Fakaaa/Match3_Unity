@@ -395,7 +395,11 @@ public class PiecesManager : MonoBehaviour
             PieceType newPiece = Instantiate(CreateDifferentPiece(matchingPieces.Peek().pieceType), grid.transform);
             piecesOnGrid.Add(newPiece);
             piecesOnGrid.Remove(matchingPieces.Peek());
-            Destroy(matchingPieces.Peek().gameObject);
+
+            Animator peekPieceAnim = matchingPieces.Peek().GetComponent<Animator>();
+            if (peekPieceAnim != null)
+                peekPieceAnim.SetBool("Destroy", true);
+            //Destroy(matchingPieces.Peek().gameObject);
             matchingPieces.Pop();
         }
     }
