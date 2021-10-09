@@ -64,7 +64,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Space))//Para testear
+        {
+            IncreaceScoreMultipler(10);
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
