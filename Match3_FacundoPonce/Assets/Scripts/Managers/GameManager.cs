@@ -46,12 +46,17 @@ public class GameManager : MonoBehaviour
     public delegate void ResetGrid();
     public ResetGrid resetGrid;
 
+    bool pitchChanged;
+
     private void Start()
     {
+        pitchChanged = false;
         initialTurns = amountTurns;
 
         updateTurnsAmount?.Invoke(amountTurns);
         updateScoreAmount?.Invoke(scorePlayer);
+
+        AudioManager.Instance.Play("TrackGameplay");
     }
 
     private void Update()
@@ -60,11 +65,23 @@ public class GameManager : MonoBehaviour
         {
             Application.Quit();
         }
+
+        if(!pitchChanged)
+        {
+            if(amountTurns <= ((25 * initialTurns) / 100))
+            {
+                AudioManager.Instance.SetPitchSound(1.5f, "TrackGameplay");
+                pitchChanged = true;
+            }
+        }
     }
 
     public void ResetAllTheGrid()
     {
         resetGrid?.Invoke();
+
+        AudioManager.Instance.SetPitchSound(1f, "TrackGameplay");
+        pitchChanged = false;
         amountTurns = initialTurns;
         scorePlayer = 0;
         updateTurnsAmount?.Invoke(amountTurns);

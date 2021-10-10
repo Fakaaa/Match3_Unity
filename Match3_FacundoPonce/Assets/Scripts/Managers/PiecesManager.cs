@@ -399,21 +399,23 @@ public class PiecesManager : MonoBehaviour
         return false;
     }
 
-    public void RemovePieceFromChain(PieceType piece)
+    public bool RemovePieceFromChain(PieceType piece)
     {
         if (matchingPieces.Count <= 0)
-            return;
+            return false;
 
         PieceController peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceController>();
         if (peekPieceOnStack == null || piece.gameObject.GetInstanceID() == peekPieceOnStack.gameObject.GetInstanceID())
-            return;
+            return false;
 
         if (matchingPieces.Contains(piece)) //Verifico si la pieza actual esta dentro del stack, si lo esta quito el ultimo push
         {
             peekPieceOnStack.RemoveFromChain();
             matchingPieces.Pop();
             removePointStack?.Invoke();
+            return true;
         }
+        return false;
     }
 
     public bool EndChain()

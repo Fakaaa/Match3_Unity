@@ -29,16 +29,25 @@ public class PieceController : MonoBehaviour, IPointerDownHandler, IPointerEnter
             return;
 
         if(!PiecesManager.Instance.IsChainStarting())
+        {            
             pieceAnimator.SetBool("Hover", true);
+        }
         else
         {
             if(PiecesManager.Instance.AddPieceToChain(piece))
             {
+                if (AudioManager.Instance != null)
+                    AudioManager.Instance.Play("Add");
+
                 AddToChain();
             }
             else
             {
-                PiecesManager.Instance.RemovePieceFromChain(piece);
+                if(PiecesManager.Instance.RemovePieceFromChain(piece))
+                {
+                    if (AudioManager.Instance != null)
+                        AudioManager.Instance.Play("Remove");
+                }
             }
         }
     }
