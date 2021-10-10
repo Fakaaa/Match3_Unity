@@ -50,8 +50,6 @@ public class PiecesManager : MonoBehaviour
     public bool chainBegin;
     public int piecesCreated;
 
-    [SerializeField] Animator allGridAnimator;
-
     List<PieceType> preMatchesPieces;
     List<int> indicesPrematches;
 
@@ -61,9 +59,18 @@ public class PiecesManager : MonoBehaviour
 
     int indexLastPieceCreated = 0;
 
-    Stack<PieceType> matchingPieces;
+    public Stack<PieceType> matchingPieces;
     int[] indexDirectionsStackPeek;
     int directions = 8;
+
+    public delegate void CreateNewPoint(int actualIndex);
+    public CreateNewPoint newPointLine;
+
+    public delegate void RemovePoint();
+    public RemovePoint removePointStack;
+
+    public delegate void ClearLineRenderer();
+    public ClearLineRenderer clearLineMatches;
 
     private void Start()
     {
@@ -90,14 +97,6 @@ public class PiecesManager : MonoBehaviour
     {
         if(!piecesGenerated)
         {
-            if(allGridAnimator != null)
-            {
-                if(allGridAnimator.GetBool("ResetGrid"))
-                {
-                    allGridAnimator.SetBool("ResetGrid", false);
-                }
-            }
-
             if (indicesPiecesToSpawm.Count > 2)
             {
                 StartCoroutine(GeneratePiecesCorutine());
@@ -374,6 +373,8 @@ public class PiecesManager : MonoBehaviour
         {
             chainBegin = true;
             matchingPieces.Push(piece);
+            newPointLine?.Invoke(matchingPieces.Count);
+
             int indexPieceOnList = piecesOnGrid.IndexOf(piece);
             CalcValuesIndexDirectionPreChain(indexPieceOnList);
         }
@@ -386,6 +387,7 @@ public class PiecesManager : MonoBehaviour
             if (CheckMatchWithStack(piece))
             {
                 matchingPieces.Push(piece);
+                newPointLine?.Invoke(matchingPieces.Count);
                 return true;
             }
             else
@@ -410,6 +412,7 @@ public class PiecesManager : MonoBehaviour
         {
             peekPieceOnStack.RemoveFromChain();
             matchingPieces.Pop();
+            removePointStack?.Invoke();
         }
     }
 
@@ -421,17 +424,30 @@ public class PiecesManager : MonoBehaviour
         {
             //Match!
             GameManager.Instance.DecreaseTurns();
-            GameManager.Instance.IncreaceScoreMultipler(matchingPieces.Count);
+            GameManager.Instance.IncreaceScoreMultipler(matchingPieces.Count, minMatchAmount);
 
             HandlePiecesAfterMatch();
+
+            clearLineMatches?.Invoke();
 
             return true;
         }
         else
         {
             //No Match!
-            GameManager.Instance.DecreaseTurns();
-            matchingPieces.Clear();
+            PieceController peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceController>();
+            int actualMatchCount = matchingPieces.Count;
+            for (int i = 0; i < actualMatchCount; i++)
+            {
+                if(peekPieceOnStack != null)
+                {
+                    peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceController>();
+                    peekPieceOnStack.RemoveFromChain();
+                    matchingPieces.Pop();
+                    removePointStack?.Invoke();
+                }
+            }
+            clearLineMatches?.Invoke();
 
             return false;
         }

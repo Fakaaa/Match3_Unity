@@ -56,10 +56,6 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))//Para testear
-        {
-            IncreaceScoreMultipler(10);
-        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
@@ -71,6 +67,8 @@ public class GameManager : MonoBehaviour
         resetGrid?.Invoke();
         amountTurns = initialTurns;
         scorePlayer = 0;
+        updateTurnsAmount?.Invoke(amountTurns);
+        updateScoreAmount?.Invoke(scorePlayer);
     }
 
     public void DecreaseTurns()
@@ -91,9 +89,13 @@ public class GameManager : MonoBehaviour
         updateScoreAmount?.Invoke(scorePlayer);
     }
 
-    public void IncreaceScoreMultipler(int multiplerPieces)
+    public void IncreaceScoreMultipler(int multiplerPieces, int minimumMatch)
     {
-        scorePlayer += scoreEarnByMatch * multiplerPieces;
+        if (multiplerPieces > minimumMatch)
+            scorePlayer += scoreEarnByMatch * (multiplerPieces-minimumMatch);
+        else
+            scorePlayer += scoreEarnByMatch;
+
         updateScoreAmount?.Invoke(scorePlayer);
     }
 
