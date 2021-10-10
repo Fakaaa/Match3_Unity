@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -8,6 +6,11 @@ public class PieceController : MonoBehaviour, IPointerDownHandler, IPointerEnter
     [SerializeField] Animator pieceAnimator;
 
     private PieceType piece;
+
+    void Start()
+    {
+        piece = GetComponent<PieceType>();
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -55,12 +58,6 @@ public class PieceController : MonoBehaviour, IPointerDownHandler, IPointerEnter
                 pieceAnimator.SetBool("Drag", false);
         }
     }
-
-    void Start()
-    {
-        piece = GetComponent<PieceType>();
-    }
-
     public void RemoveFromChain()
     {
         if (pieceAnimator == null)

@@ -465,7 +465,6 @@ public class PiecesManager : MonoBehaviour
             Animator peekPieceAnim = matchingPieces.Peek().GetComponent<Animator>();
             if (peekPieceAnim != null)
                 peekPieceAnim.SetBool("Destroy", true);
-            //Destroy(matchingPieces.Peek().gameObject);
             matchingPieces.Pop();
         }
     }

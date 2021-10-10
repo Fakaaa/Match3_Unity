@@ -344,7 +344,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65386591d0126cb46a573e13cbf0adb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  matchedPieces: {fileID: 105643685}
 --- !u!1 &105643679
 GameObject:
   m_ObjectHideFlags: 0
@@ -494,7 +493,7 @@ MonoBehaviour:
   generateLightPieces: 0
   generateIcePieces: 0
   generateLeafPieces: 1
-  minMatchAmount: 3
+  minMatchAmount: 6
   piecesOnGrid: []
   piecesGenerated: 0
   chainBegin: 0

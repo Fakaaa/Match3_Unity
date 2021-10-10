@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class LineRendererPieces : MonoBehaviour
 {
-    [SerializeField] PiecesManager matchedPieces;
     LineRenderer rendererLines;
 
     void Start()
@@ -10,34 +9,34 @@ public class LineRendererPieces : MonoBehaviour
         rendererLines = GetComponent<LineRenderer>();
         rendererLines.positionCount = 0;
 
-        matchedPieces.newPointLine += AddPointOnPiece;
-        matchedPieces.clearLineMatches += ClearLine;
-        matchedPieces.removePointStack += RemovePointOnPiece;
+        PiecesManager.Instance.newPointLine += AddPointOnPiece;
+        PiecesManager.Instance.clearLineMatches += ClearLine;
+        PiecesManager.Instance.removePointStack += RemovePointOnPiece;
     }
 
     private void OnDisable()
     {
-        matchedPieces.newPointLine -= AddPointOnPiece;
-        matchedPieces.clearLineMatches -= ClearLine;
-        matchedPieces.removePointStack -= RemovePointOnPiece;
+        PiecesManager.Instance.newPointLine -= AddPointOnPiece;
+        PiecesManager.Instance.clearLineMatches -= ClearLine;
+        PiecesManager.Instance.removePointStack -= RemovePointOnPiece;
     }
 
     public void AddPointOnPiece(int indexPoint)
     {
-        if (rendererLines == null || matchedPieces == null)
+        if (rendererLines == null || PiecesManager.Instance == null)
             return;
 
-        rendererLines.positionCount = matchedPieces.matchingPieces.Count;
+        rendererLines.positionCount = PiecesManager.Instance.matchingPieces.Count;
 
-        rendererLines.SetPosition(indexPoint-1, matchedPieces.matchingPieces.Peek().transform.position + new Vector3(0,0,2));
+        rendererLines.SetPosition(indexPoint-1, PiecesManager.Instance.matchingPieces.Peek().transform.position);
     }
 
     public void RemovePointOnPiece()
     {
-        if (rendererLines == null || matchedPieces == null)
+        if (rendererLines == null || PiecesManager.Instance == null)
             return;
 
-        rendererLines.positionCount = matchedPieces.matchingPieces.Count;
+        rendererLines.positionCount = PiecesManager.Instance.matchingPieces.Count;
     }
 
     public void ClearLine()
