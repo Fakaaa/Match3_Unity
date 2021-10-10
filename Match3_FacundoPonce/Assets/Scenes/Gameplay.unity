@@ -435,7 +435,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d43c6ccbc943a8498ac6edb7f13cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPiecesX: 12
+  amountPiecesX: 10
   amountPiecesY: 8
   layoutGrid: {fileID: 0}
   widthGridContainer: 40
@@ -489,9 +489,9 @@ MonoBehaviour:
   generateWaterPieces: 1
   generateAirPieces: 1
   generateEarthPieces: 1
-  generateDarkPieces: 0
-  generateLightPieces: 0
-  generateIcePieces: 0
+  generateDarkPieces: 1
+  generateLightPieces: 1
+  generateIcePieces: 1
   generateLeafPieces: 1
   minMatchAmount: 3
   piecesOnGrid: []
@@ -2611,6 +2611,10 @@ PrefabInstance:
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: scoreEarnByMatch
       value: 250
+      objectReference: {fileID: 0}
+    - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
+      propertyPath: porcentTurnsDecreasePitch
+      value: 25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}

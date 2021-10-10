@@ -46,6 +46,19 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public float GetSoundPitch(string name)
+    {
+        Sound s = Array.Find(sounds, sound => sound.name == name);
+        if(s != null)
+        {
+            return s.picth;
+        }
+        else
+        {
+            return 0.0f;
+        }
+    }
+
     public void SetPitchSound(float pitch, string name)
     {
         Sound s = Array.Find(sounds, sound => sound.name == name);

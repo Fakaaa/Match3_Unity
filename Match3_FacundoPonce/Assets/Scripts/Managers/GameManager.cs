@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] public int scoreEarnByMatch;
 
+    [SerializeField] public float porcentTurnsDecreasePitch;
+
     int initialTurns;
 
     public delegate void TurnsUpdate(int amount);
@@ -47,11 +49,19 @@ public class GameManager : MonoBehaviour
     public ResetGrid resetGrid;
 
     bool pitchChanged;
+    float targetPicth;
+    float originalPitch;
+    float actualPitch;
+
 
     private void Start()
     {
         pitchChanged = false;
         initialTurns = amountTurns;
+
+        originalPitch = AudioManager.Instance.GetSoundPitch("TrackGameplay");
+        targetPicth = originalPitch + 0.5f;
+        actualPitch = originalPitch;
 
         updateTurnsAmount?.Invoke(amountTurns);
         updateScoreAmount?.Invoke(scorePlayer);
@@ -66,12 +76,45 @@ public class GameManager : MonoBehaviour
             Application.Quit();
         }
 
-        if(!pitchChanged)
+        IncreasePitchMusic();
+
+        DecreasePitchMusic();
+    }
+
+    public void IncreasePitchMusic()
+    {
+        if (!pitchChanged)
         {
-            if(amountTurns <= ((25 * initialTurns) / 100))
+            if (amountTurns <= ((porcentTurnsDecreasePitch * initialTurns) / 100))
             {
-                AudioManager.Instance.SetPitchSound(1.5f, "TrackGameplay");
-                pitchChanged = true;
+                if (actualPitch < targetPicth)
+                {
+                    actualPitch += Time.deltaTime * 0.5f;
+                    AudioManager.Instance.SetPitchSound(actualPitch, "TrackGameplay");
+                }
+                else
+                {
+                    actualPitch = targetPicth;
+                    AudioManager.Instance.SetPitchSound(actualPitch, "TrackGameplay");
+                    pitchChanged = true;
+                }
+            }
+        }
+    }
+
+    public void DecreasePitchMusic()
+    {
+        if (amountTurns <= 0 && pitchChanged)
+        {
+            if (actualPitch > originalPitch)
+            {
+                actualPitch -= Time.deltaTime * 0.5f;
+                AudioManager.Instance.SetPitchSound(actualPitch, "TrackGameplay");
+            }
+            else
+            {
+                actualPitch = originalPitch;
+                AudioManager.Instance.SetPitchSound(originalPitch, "TrackGameplay");
             }
         }
     }
@@ -80,7 +123,6 @@ public class GameManager : MonoBehaviour
     {
         resetGrid?.Invoke();
 
-        AudioManager.Instance.SetPitchSound(1f, "TrackGameplay");
         pitchChanged = false;
         amountTurns = initialTurns;
         scorePlayer = 0;
