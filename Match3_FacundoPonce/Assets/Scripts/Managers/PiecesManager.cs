@@ -125,8 +125,6 @@ public class PiecesManager : MonoBehaviour
 
         if(automaticMatchingState)
         {
-            stateGrid.BlockGrid();
-
             for (int i = 0; i < piecesOnGrid.Count; i++)
             {
                 Stack<PieceType> detectNewMatchHor = new Stack<PieceType>();
@@ -219,11 +217,17 @@ public class PiecesManager : MonoBehaviour
             automaticMatches.Clear();
             stateGrid.UnblockGrid();
             yield return null;
+        }        
+
+        if(automaticMatches.Count > 0)
+        {
+            stateGrid.BlockGrid();
         }
 
         for (int i = 0; i < automaticMatches.Count; i++)
         {
             GameManager.Instance.IncreaceScoreMultipler(automaticMatches[i].Count, minMatchAmount);
+            AudioManager.Instance.Play("Match");
 
             while (automaticMatches[i].Count > 0)
             {
@@ -245,6 +249,7 @@ public class PiecesManager : MonoBehaviour
         }
 
         automaticMatches.Clear();
+        yield return new WaitForSeconds(1f);
         stateGrid.UnblockGrid();
         yield return null;
     }
@@ -580,6 +585,8 @@ public class PiecesManager : MonoBehaviour
             HandlePiecesAfterMatch();
 
             clearLineMatches?.Invoke();
+
+            AudioManager.Instance.Play("Match");
 
             automaticMatchingState = true;
 

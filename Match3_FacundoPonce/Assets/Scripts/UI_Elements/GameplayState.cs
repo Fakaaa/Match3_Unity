@@ -23,11 +23,13 @@ public class GameplayState : MonoBehaviour
 
     public void BlockGrid()
     {
+        allGrid.alpha = 0.8f;
         allGrid.blocksRaycasts = false;
     }
 
     public void UnblockGrid()
     {
+        allGrid.alpha = 1f;
         allGrid.blocksRaycasts = true;
     }
 

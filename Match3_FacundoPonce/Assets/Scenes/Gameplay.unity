@@ -435,7 +435,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d43c6ccbc943a8498ac6edb7f13cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPiecesX: 11
+  amountPiecesX: 10
   amountPiecesY: 8
   layoutGrid: {fileID: 0}
   widthGridContainer: 40
@@ -488,12 +488,12 @@ MonoBehaviour:
   generateFirePieces: 1
   generateWaterPieces: 0
   generateAirPieces: 0
-  generateEarthPieces: 0
+  generateEarthPieces: 1
   generateDarkPieces: 0
-  generateLightPieces: 0
+  generateLightPieces: 1
   generateIcePieces: 0
   generateLeafPieces: 1
-  minMatchAmount: 4
+  minMatchAmount: 3
   piecesOnGrid: []
   piecesGenerated: 0
   chainBegin: 0
@@ -562,11 +562,11 @@ MonoBehaviour:
     source: {fileID: 0}
     name: TrackGameplay
     loop: 1
-  - clip: {fileID: 0}
-    volume: 0
-    picth: 0
+  - clip: {fileID: 8300000, guid: 07af4b91a720b6d49bfa19948a9f2b94, type: 3}
+    volume: 1
+    picth: 1
     source: {fileID: 0}
-    name: Press
+    name: Match
     loop: 0
   - clip: {fileID: 8300000, guid: 42c5daa6f034f0644b6226d81bc91758, type: 3}
     volume: 1
@@ -579,18 +579,6 @@ MonoBehaviour:
     picth: 1
     source: {fileID: 0}
     name: Add
-    loop: 0
-  - clip: {fileID: 0}
-    volume: 0
-    picth: 0
-    source: {fileID: 0}
-    name: Release
-    loop: 0
-  - clip: {fileID: 0}
-    volume: 0
-    picth: 0
-    source: {fileID: 0}
-    name: PieceDestroy
     loop: 0
 --- !u!1 &445209369
 GameObject:
