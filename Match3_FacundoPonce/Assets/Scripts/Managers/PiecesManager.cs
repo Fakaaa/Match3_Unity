@@ -67,7 +67,9 @@ public class PiecesManager : MonoBehaviour
 
     public Stack<PieceType> matchingPieces;
     int[] indexDirectionsStackPeek;
+    int[] indexDirectionsAutomaticMatch;
     int directions = 8;
+    int directionsAutoMatch = 4;
 
     public delegate void CreateNewPoint(int actualIndex);
     public CreateNewPoint newPointLine;
@@ -96,6 +98,7 @@ public class PiecesManager : MonoBehaviour
         preMatchesPieces = new List<PieceType>();
 
         indexDirectionsStackPeek = new int[directions];
+        indexDirectionsAutomaticMatch = new int[directionsAutoMatch];
 
         piecesX = grid.amountPiecesX;
         piecesY = grid.amountPiecesY;
@@ -111,8 +114,7 @@ public class PiecesManager : MonoBehaviour
             {
                 StartCoroutine(GeneratePiecesCorutine());
 
-                //for (int i = 0; i < 5; i++) //Cinco veces para asegurarnos
-                //    FilterPreMatchesOnGrid();
+                FilterPreMatchesOnGrid();
             }
             else
             {
@@ -127,8 +129,10 @@ public class PiecesManager : MonoBehaviour
 
             for (int i = 0; i < piecesOnGrid.Count; i++)
             {
-                Stack<PieceType> detectNewMatch = new Stack<PieceType>();
-                CheckAutoMatchHorizontal(i, detectNewMatch);
+                Stack<PieceType> detectNewMatchHor = new Stack<PieceType>();
+                CheckAutoMatchHorizontal(i, detectNewMatchHor);
+                Stack<PieceType> detectNewMatchVert = new Stack<PieceType>();
+                CheckAutoMatchVertical(i, detectNewMatchVert);
             }
 
             StartCoroutine(MakeAutomaticMatch());
@@ -142,11 +146,11 @@ public class PiecesManager : MonoBehaviour
         {
             CalcHorValuesIndexDirectionStack(index);
 
-            for (int i = 0; i < directions; i++)
+            for (int i = 0; i < 2; i++)
             {
                 if(index +1 < piecesOnGrid.Count-1)
                 {
-                    if (index+1 == indexDirectionsStackPeek[i] &&
+                    if (index+1 == indexDirectionsAutomaticMatch[i] &&
                         piecesOnGrid[index + 1].pieceType == piecesOnGrid[index].pieceType)
                     {
                         if(!matchDetected.Contains(piecesOnGrid[index]))
@@ -163,6 +167,41 @@ public class PiecesManager : MonoBehaviour
                         else if(matchDetected.Count >= minMatchAmount)
                         {
                             if(!automaticMatches.Contains(matchDetected))
+                                automaticMatches.Add(matchDetected);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void CheckAutoMatchVertical(int index, Stack<PieceType> matchDetected)
+    {
+        if (piecesOnGrid[index] != null)
+        {
+            CalcVertValuesIndexDirectionStack(index);
+
+            for (int i = 2; i < 4; i++)
+            {
+                if (index + piecesX < piecesOnGrid.Count - 1)
+                {
+                    if (index + piecesX == indexDirectionsAutomaticMatch[i] &&
+                        piecesOnGrid[index + piecesX].pieceType == piecesOnGrid[index].pieceType)
+                    {
+                        if (!matchDetected.Contains(piecesOnGrid[index]))
+                            matchDetected.Push(piecesOnGrid[index]);
+                        if (!matchDetected.Contains(piecesOnGrid[index + piecesX]))
+                            matchDetected.Push(piecesOnGrid[index + piecesX]);
+
+                        CheckAutoMatchVertical(index + piecesX, matchDetected);
+                    }
+                    else
+                    {
+                        if (matchDetected.Count < minMatchAmount)
+                            matchDetected.Clear();
+                        else if (matchDetected.Count >= minMatchAmount)
+                        {
+                            if (!automaticMatches.Contains(matchDetected))
                                 automaticMatches.Add(matchDetected);
                         }
                     }
@@ -228,6 +267,8 @@ public class PiecesManager : MonoBehaviour
         piecesCreated = 0;
         chainBegin = false;
         automaticMatchingState = false;
+
+        StopAllCoroutines();
 
         for (int i = 0; i < piecesX * piecesY; i++)
         {
@@ -367,11 +408,18 @@ public class PiecesManager : MonoBehaviour
         }
         int randIndex = 0;
         int randomPiece = 0;
-        do
+        if(indicesPiecesToSpawm.Count > 2)
+        {
+            do
+            {
+                randIndex = Random.Range(0, indicesPiecesToSpawm.Count);
+
+            } while (indicesPiecesToSpawm[randIndex] == indexToEvade || indicesPiecesToSpawm[randIndex] == indexLastPieceCreated);
+        }
+        else
         {
             randIndex = Random.Range(0, indicesPiecesToSpawm.Count);
-
-        } while (indicesPiecesToSpawm[randIndex] == indexToEvade || indicesPiecesToSpawm[randIndex] == indexLastPieceCreated);
+        }
 
         randomPiece = indicesPiecesToSpawm[randIndex];
         pieceToCreate = prefabsPieces[randomPiece];
@@ -563,8 +611,8 @@ public class PiecesManager : MonoBehaviour
         int amountMatchPieces = matchingPieces.Count;
         for (int i = 0; i < amountMatchPieces; i++)
         {
-            PieceType newPiece = Instantiate(CreateDifferentPiece(matchingPieces.Peek().pieceType), grid.transform);
-            piecesOnGrid.Add(newPiece);
+            if(piecesOnGrid.Count <= piecesX * piecesY)
+                piecesOnGrid.Add(Instantiate(CreateDifferentPiece(matchingPieces.Peek().pieceType), grid.transform));
             piecesOnGrid.Remove(matchingPieces.Peek());
 
             Animator peekPieceAnim = matchingPieces.Peek().GetComponent<Animator>();
@@ -596,9 +644,17 @@ public class PiecesManager : MonoBehaviour
     public void CalcHorValuesIndexDirectionStack(int indexLastPieceStaked)
     {
         //Derecha
-        SetValueIndexDirection(0, indexLastPieceStaked + 1);
+        SetValueDirection(0, indexLastPieceStaked + 1);
         //Izquierda
-        SetValueIndexDirection(1, indexLastPieceStaked - 1);
+        SetValueDirection(1, indexLastPieceStaked - 1);
+    }
+
+    public void CalcVertValuesIndexDirectionStack(int indexLastPieceStaked)
+    {
+        //Abajo
+        SetValueDirection(2, indexLastPieceStaked + piecesX);
+        //Arriba
+        SetValueDirection(3, indexLastPieceStaked - piecesX);
     }
 
     public void CalcValuesIndexDirectionPreChain(int indexLastPieceStaked)
@@ -657,7 +713,13 @@ public class PiecesManager : MonoBehaviour
 
     public void SetValueIndexDirection(int indexArray, int value)
     {
-        if(indexArray >= 0 && indexArray < directions)
+        if(value >= 0 && value < piecesOnGrid.Count -1)
             indexDirectionsStackPeek[indexArray] = value;
+    }
+
+    public void SetValueDirection(int indexArray, int value)
+    {
+        if (value >= 0 && value < piecesOnGrid.Count -1)
+            indexDirectionsAutomaticMatch[indexArray] = value;
     }
 }

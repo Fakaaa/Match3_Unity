@@ -435,8 +435,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d43c6ccbc943a8498ac6edb7f13cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPiecesX: 13
-  amountPiecesY: 7
+  amountPiecesX: 11
+  amountPiecesY: 8
   layoutGrid: {fileID: 0}
   widthGridContainer: 40
   heightGridContainer: 25
@@ -491,9 +491,9 @@ MonoBehaviour:
   generateEarthPieces: 0
   generateDarkPieces: 0
   generateLightPieces: 0
-  generateIcePieces: 1
+  generateIcePieces: 0
   generateLeafPieces: 1
-  minMatchAmount: 3
+  minMatchAmount: 4
   piecesOnGrid: []
   piecesGenerated: 0
   chainBegin: 0
