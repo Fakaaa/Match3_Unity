@@ -435,8 +435,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d43c6ccbc943a8498ac6edb7f13cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPiecesX: 10
-  amountPiecesY: 8
+  amountPiecesX: 13
+  amountPiecesY: 7
   layoutGrid: {fileID: 0}
   widthGridContainer: 40
   heightGridContainer: 25
@@ -486,17 +486,18 @@ MonoBehaviour:
   - {fileID: 756619724243600356, guid: 82cd13746b5146a469ed83a0ee018751, type: 3}
   - {fileID: 1227863497584358547, guid: 6449e0b9d29011a4e97878f73c4982ee, type: 3}
   generateFirePieces: 1
-  generateWaterPieces: 1
-  generateAirPieces: 1
-  generateEarthPieces: 1
-  generateDarkPieces: 1
-  generateLightPieces: 1
+  generateWaterPieces: 0
+  generateAirPieces: 0
+  generateEarthPieces: 0
+  generateDarkPieces: 0
+  generateLightPieces: 0
   generateIcePieces: 1
   generateLeafPieces: 1
   minMatchAmount: 3
   piecesOnGrid: []
   piecesGenerated: 0
   chainBegin: 0
+  automaticMatchingState: 0
   piecesCreated: 0
 --- !u!114 &105643686
 MonoBehaviour:
@@ -2606,7 +2607,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: amountTurns
-      value: 15
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: scoreEarnByMatch

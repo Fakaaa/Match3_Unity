@@ -48,12 +48,18 @@ public class PiecesManager : MonoBehaviour
 
     public bool piecesGenerated;
     public bool chainBegin;
+
+    public bool automaticMatchingState;
+
     public int piecesCreated;
 
     List<PieceType> preMatchesPieces;
+    List<Stack<PieceType>> automaticMatches;
+
     List<int> indicesPrematches;
 
     GridManager grid;
+    GameplayState stateGrid;
     int piecesX;
     int piecesY;
 
@@ -79,10 +85,14 @@ public class PiecesManager : MonoBehaviour
         piecesGenerated = false;
 
         grid = gameObject.GetComponent<GridManager>();
+        stateGrid = gameObject.GetComponentInParent<GameplayState>();
         matchingPieces = new Stack<PieceType>();
         indicesPiecesToSpawm = new List<int>();
 
         indicesPrematches = new List<int>();
+
+        automaticMatches = new List<Stack<PieceType>>();
+
         preMatchesPieces = new List<PieceType>();
 
         indexDirectionsStackPeek = new int[directions];
@@ -101,8 +111,8 @@ public class PiecesManager : MonoBehaviour
             {
                 StartCoroutine(GeneratePiecesCorutine());
 
-                for (int i = 0; i < 5; i++) //Cinco veces para asegurarnos
-                    FilterPreMatchesOnGrid();
+                //for (int i = 0; i < 5; i++) //Cinco veces para asegurarnos
+                //    FilterPreMatchesOnGrid();
             }
             else
             {
@@ -110,6 +120,94 @@ public class PiecesManager : MonoBehaviour
             }
             piecesGenerated = true;
         }
+
+        if(automaticMatchingState)
+        {
+            stateGrid.BlockGrid();
+
+            for (int i = 0; i < piecesOnGrid.Count; i++)
+            {
+                Stack<PieceType> detectNewMatch = new Stack<PieceType>();
+                CheckAutoMatchHorizontal(i, detectNewMatch);
+            }
+
+            StartCoroutine(MakeAutomaticMatch());
+            automaticMatchingState = false;
+        }
+    }
+
+    public void CheckAutoMatchHorizontal(int index, Stack<PieceType> matchDetected)
+    {
+        if(piecesOnGrid[index] != null)
+        {
+            CalcHorValuesIndexDirectionStack(index);
+
+            for (int i = 0; i < directions; i++)
+            {
+                if(index +1 < piecesOnGrid.Count-1)
+                {
+                    if (index+1 == indexDirectionsStackPeek[i] &&
+                        piecesOnGrid[index + 1].pieceType == piecesOnGrid[index].pieceType)
+                    {
+                        if(!matchDetected.Contains(piecesOnGrid[index]))
+                            matchDetected.Push(piecesOnGrid[index]);
+                        if (!matchDetected.Contains(piecesOnGrid[index+1]))
+                            matchDetected.Push(piecesOnGrid[index+1]);
+
+                        CheckAutoMatchHorizontal(index+1, matchDetected);
+                    }
+                    else
+                    {
+                        if(matchDetected.Count < minMatchAmount)
+                            matchDetected.Clear();
+                        else if(matchDetected.Count >= minMatchAmount)
+                        {
+                            if(!automaticMatches.Contains(matchDetected))
+                                automaticMatches.Add(matchDetected);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public IEnumerator MakeAutomaticMatch()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (GameManager.Instance.amountTurns <= 0)
+        {
+            automaticMatches.Clear();
+            stateGrid.UnblockGrid();
+            yield return null;
+        }
+
+        for (int i = 0; i < automaticMatches.Count; i++)
+        {
+            GameManager.Instance.IncreaceScoreMultipler(automaticMatches[i].Count, minMatchAmount);
+
+            while (automaticMatches[i].Count > 0)
+            {
+                if(piecesOnGrid.Count <= piecesX * piecesY)
+                    piecesOnGrid.Add(Instantiate(CreateDifferentPiece(automaticMatches[i].Peek().pieceType), grid.transform));
+                
+                piecesOnGrid.Remove(automaticMatches[i].Peek());
+
+                if(automaticMatches[i].Peek() != null)
+                {
+                    Animator peekPieceAnim = automaticMatches[i].Peek().GetComponent<Animator>();
+                    if (peekPieceAnim != null)
+                        peekPieceAnim.SetBool("Destroy", true);
+                }
+                automaticMatches[i].Pop();
+
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        automaticMatches.Clear();
+        stateGrid.UnblockGrid();
+        yield return null;
     }
 
     public IEnumerator GeneratePiecesCorutine()
@@ -129,6 +227,7 @@ public class PiecesManager : MonoBehaviour
     {
         piecesCreated = 0;
         chainBegin = false;
+        automaticMatchingState = false;
 
         for (int i = 0; i < piecesX * piecesY; i++)
         {
@@ -136,6 +235,8 @@ public class PiecesManager : MonoBehaviour
         }
 
         piecesOnGrid.Clear();
+        matchingPieces.Clear();
+        automaticMatches.Clear();
         piecesGenerated = false;
     }
 
@@ -432,6 +533,8 @@ public class PiecesManager : MonoBehaviour
 
             clearLineMatches?.Invoke();
 
+            automaticMatchingState = true;
+
             return true;
         }
         else
@@ -490,6 +593,14 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
+    public void CalcHorValuesIndexDirectionStack(int indexLastPieceStaked)
+    {
+        //Derecha
+        SetValueIndexDirection(0, indexLastPieceStaked + 1);
+        //Izquierda
+        SetValueIndexDirection(1, indexLastPieceStaked - 1);
+    }
+
     public void CalcValuesIndexDirectionPreChain(int indexLastPieceStaked)
     {
         //Derecha
@@ -532,15 +643,21 @@ public class PiecesManager : MonoBehaviour
 
         for (int i = 0; i < directions; i++)
         {
-            if (indexPieceOutStack == indexDirectionsStackPeek[i] &&
-                piecesOnGrid[indexPieceOutStack].pieceType == piecesOnGrid[indexLastPieceStaked].pieceType)
-                return true;
+            if (indexPieceOutStack >= 0 && indexPieceOutStack < piecesOnGrid.Count - 1)
+            {
+                if (indexPieceOutStack == indexDirectionsStackPeek[i] &&
+                    piecesOnGrid[indexPieceOutStack].pieceType == piecesOnGrid[indexLastPieceStaked].pieceType)
+                    return true;
+            }
+            else
+                return false;
         }
         return false;
     }
 
     public void SetValueIndexDirection(int indexArray, int value)
     {
-        indexDirectionsStackPeek[indexArray] = value;
+        if(indexArray >= 0 && indexArray < directions)
+            indexDirectionsStackPeek[indexArray] = value;
     }
 }
