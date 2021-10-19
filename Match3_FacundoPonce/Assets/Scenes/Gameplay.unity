@@ -557,7 +557,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sounds:
   - clip: {fileID: 8300000, guid: 6631e1f12ed5dea40b446220da55060a, type: 3}
-    volume: 0.08
+    volume: 0
     picth: 1
     source: {fileID: 0}
     name: TrackGameplay
