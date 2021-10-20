@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GameplayState : MonoBehaviour
+public class GridState : MonoBehaviour
 {
     [SerializeField] CanvasGroup allGrid;
     [SerializeField] Animator gridAnimator;
@@ -17,28 +17,32 @@ public class GameplayState : MonoBehaviour
 
     public void BlockAndBlendGrid()
     {
-        allGrid.alpha = 0.6f;
-        allGrid.blocksRaycasts = false;
+        //allGrid.alpha = 0.6f;
+        //allGrid.blocksRaycasts = false;
     }
 
     public void BlockGrid()
     {
-        allGrid.alpha = 0.8f;
-        allGrid.blocksRaycasts = false;
+        //allGrid.alpha = 0.8f;
+        //allGrid.blocksRaycasts = false;
     }
 
     public void UnblockGrid()
     {
-        allGrid.alpha = 1f;
-        allGrid.blocksRaycasts = true;
+        //allGrid.alpha = 1f;
+        //allGrid.blocksRaycasts = true;
     }
 
     public void RestoreGrid()
     {
-        allGrid.alpha = 1f;
-        allGrid.blocksRaycasts = true;
+        //allGrid.alpha = 1f;
+        //allGrid.blocksRaycasts = true;
     }
 
+    public void ShowGrid()
+    {
+        gridAnimator.SetBool("CanShowGrid", true);
+    }
     public void ResetGrid()
     {
         gridAnimator.SetBool("ResetGrid", true);

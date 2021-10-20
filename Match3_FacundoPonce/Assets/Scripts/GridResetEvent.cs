@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class GridResetEvent : MonoBehaviour
 {
-    [SerializeField] PiecesManager managerPieces;
-
+    PiecesManager managerPieces;
     Animator gridAnim;
 
     private void Start()
     {
+        managerPieces = GetComponent<PiecesManager>();
         gridAnim = GetComponent<Animator>();
     }
 
