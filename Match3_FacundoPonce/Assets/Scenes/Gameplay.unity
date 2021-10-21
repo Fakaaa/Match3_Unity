@@ -502,6 +502,8 @@ MonoBehaviour:
   piecesCreated: 0
   piecesParent: {fileID: 0}
   createPiecesAfterSort: 0
+  amountTimesMatches: 0
+  maxAutoMatches: 0
 --- !u!114 &105643686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3027,6 +3029,8 @@ MonoBehaviour:
   piecesCreated: 0
   piecesParent: {fileID: 1377683788}
   createPiecesAfterSort: 0
+  amountTimesMatches: 0
+  maxAutoMatches: 1
 --- !u!114 &2071454715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3309,7 +3313,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: amountTurns
-      value: 15
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: scoreEarnByMatch

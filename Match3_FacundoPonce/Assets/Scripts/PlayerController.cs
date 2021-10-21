@@ -27,6 +27,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void BlockPlayerInteraction()
+    {
+        coll.enabled = false;
+    }
+
+    public void UnblockPlayerInteraction()
+    {
+        coll.enabled = true;
+    }
+
     public void UpdatePosition()
     {
         transform.position = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));

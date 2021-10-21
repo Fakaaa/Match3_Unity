@@ -53,6 +53,8 @@ public class GameManager : MonoBehaviour
     float originalPitch;
     float actualPitch;
 
+    PlayerController playerInput;
+
 
     private void Start()
     {
@@ -67,6 +69,8 @@ public class GameManager : MonoBehaviour
         updateScoreAmount?.Invoke(scorePlayer);
 
         AudioManager.Instance.Play("TrackGameplay");
+
+        playerInput = FindObjectOfType<PlayerController>();
     }
 
     private void Update()
@@ -119,9 +123,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void BlockPlayerInteractions()
+    {
+        playerInput.BlockPlayerInteraction();
+    }
+
+    public void UnblockPlayerInteractions()
+    {
+        playerInput.UnblockPlayerInteraction();
+    }
+
     public void ResetAllTheGrid()
     {
         resetGrid?.Invoke();
+        playerInput.UnblockPlayerInteraction();
+        PiecesManager.Instance.StopAllCoroutines();
 
         pitchChanged = false;
         amountTurns = initialTurns;
@@ -138,6 +154,7 @@ public class GameManager : MonoBehaviour
         if(amountTurns <= 0)
         {
             amountTurns = 0;
+            playerInput.BlockPlayerInteraction();
             isMatchEnded?.Invoke();
         }
     }
