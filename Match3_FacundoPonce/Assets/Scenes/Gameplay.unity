@@ -495,11 +495,13 @@ MonoBehaviour:
   generateIcePieces: 0
   generateLeafPieces: 1
   minMatchAmount: 3
+  speedVerticalFall: 0
   piecesGenerated: 0
   chainBegin: 0
   autoSortAndMatch: 0
   piecesCreated: 0
   piecesParent: {fileID: 0}
+  createPiecesAfterSort: 0
 --- !u!114 &105643686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2982,8 +2984,8 @@ MonoBehaviour:
   prefabGridNode: {fileID: 501107933941053028, guid: d6605e873a4277144a27943fa1a969bc, type: 3}
   spacingX: 1
   spacingY: 1
-  amountPiecesX: 8
-  amountPiecesY: 7
+  amountPiecesX: 14
+  amountPiecesY: 6
   nodesGenerated: 0
   amountNodesGenerated: 0
   initialPosition: {x: 0, y: 0, z: 0}
@@ -3018,11 +3020,13 @@ MonoBehaviour:
   generateIcePieces: 1
   generateLeafPieces: 0
   minMatchAmount: 3
+  speedVerticalFall: 2
   piecesGenerated: 0
   chainBegin: 0
   autoSortAndMatch: 0
   piecesCreated: 0
   piecesParent: {fileID: 1377683788}
+  createPiecesAfterSort: 0
 --- !u!114 &2071454715
 MonoBehaviour:
   m_ObjectHideFlags: 0

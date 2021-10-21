@@ -9,4 +9,5 @@ public class PieceType : MonoBehaviour
     public TypePiece pieceType;
     [HideInInspector] public bool spawnAviable;
     public NodeGrid myNode;
+    public bool makingVerticalMove;
 }

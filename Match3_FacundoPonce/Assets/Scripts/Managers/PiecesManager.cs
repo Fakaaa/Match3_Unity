@@ -44,6 +44,7 @@ public class PiecesManager : MonoBehaviour
     [Space(20)]
     [Header("PIECES CONFIG AND REFERENCES")]
     [SerializeField] public int minMatchAmount;
+    [SerializeField] float speedVerticalFall;
     //[SerializeField] public List<PieceType> piecesOnGrid;
 
     public bool piecesGenerated;
@@ -88,7 +89,7 @@ public class PiecesManager : MonoBehaviour
     #region AUTO_SORT&MATCH
 
     List<NodeGrid> nodesEmpty;
-   
+    public bool createPiecesAfterSort;
 
     #endregion
 
@@ -144,6 +145,8 @@ public class PiecesManager : MonoBehaviour
         if (autoSortAndMatch)
         {
             FindEmptyNodes();
+
+            FillFirstRowWithPieces();
         }
     }
 
@@ -524,6 +527,7 @@ public class PiecesManager : MonoBehaviour
 
             //Vector3 newPositionPiece = new Vector3(matchingPieces.Peek().myNode.transform.position.x, matchingPieces.Peek().myNode.transform.position.y + piecesY);
             //PieceType piece = Instantiate(CreateDifferentPiece(matchingPieces.Peek().pieceType), newPositionPiece, Quaternion.identity, piecesParent);
+            
             nodesEmpty.Add(matchingPieces.Peek().myNode);
             matchingPieces.Peek().myNode.SetPieceOnNode(null);
             matchingPieces.Pop();
@@ -570,21 +574,33 @@ public class PiecesManager : MonoBehaviour
                 nodesEmpty.Remove(fromNode);
             }
         }
-
-        //if(fromNode.GetGridPos().y - 1 < 0)
-        //{
-        //    nodesEmpty.Clear();
-        //}
     }
 
-    void SortGrid()
+    void FillFirstRowWithPieces()
+    {
+        for (int i = 0; i < piecesX; i++)
+        {
+            if(grid.gridNodes[i,0] != null)
+            {
+                if(grid.gridNodes[i, 0].GetPiece() == null)
+                {
+                    int randPiece = Random.Range(0, indicesPiecesToSpawm.Count);
+                    PieceType pieceToCreate = Instantiate(prefabsPieces[indicesPiecesToSpawm[randPiece]], grid.gridNodes[i, 0].transform.position, Quaternion.identity, piecesParent);
+                    grid.gridNodes[i, 0].SetPieceOnNode(pieceToCreate);
+                    pieceToCreate.myNode = grid.gridNodes[i, 0];
+                }
+            }
+        }
+    }
+
+    void CheckMatchWhenSort()
     {
         
     }
 
     void CreatePiecesAndRestoreTop()
     {
-
+        
     }
 
     IEnumerator PlacePieceOnPosition(PieceType piece, Vector3 initialPosition, Vector3 targetPosition)
@@ -593,7 +609,7 @@ public class PiecesManager : MonoBehaviour
 
         while (piece.transform.position != targetPosition)
         {
-            timeToEnd += Time.deltaTime;
+            timeToEnd += Time.deltaTime * speedVerticalFall;
 
             piece.transform.position = Vector3.Lerp(initialPosition, targetPosition, timeToEnd);
 
@@ -613,14 +629,6 @@ public class PiecesManager : MonoBehaviour
             else
                 return false;
         }
-    }
-
-    void CalcHorValuesIndexDirectionStack(int indexLastPieceStaked)
-    {
-        //Derecha
-        SetValueDirection(0, indexLastPieceStaked + 1);
-        //Izquierda
-        SetValueDirection(1, indexLastPieceStaked - 1);
     }
 
     void CalcVertValuesIndexDirectionStack(NodeGrid pieceNode)
@@ -661,7 +669,7 @@ public class PiecesManager : MonoBehaviour
         for (int i = 0; i < directions; i++)
         {
             if ((nodeOutStack.GetGridPos().x >= 0 || nodeOutStack.GetGridPos().x < piecesX) &&
-               (nodeOutStack.GetGridPos().y >= 0 || nodeOutStack.GetGridPos().y < piecesY))
+                (nodeOutStack.GetGridPos().y >= 0 || nodeOutStack.GetGridPos().y < piecesY))
             {
                 if (nodeOutStack.GetGridPos() == indexDirectionsPieceStack[i])
                     return true;
