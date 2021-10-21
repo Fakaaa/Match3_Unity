@@ -560,7 +560,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sounds:
   - clip: {fileID: 8300000, guid: 6631e1f12ed5dea40b446220da55060a, type: 3}
-    volume: 0
+    volume: 0.1
     picth: 1
     source: {fileID: 0}
     name: TrackGameplay
@@ -3015,10 +3015,10 @@ MonoBehaviour:
   generateWaterPieces: 0
   generateAirPieces: 0
   generateEarthPieces: 1
-  generateDarkPieces: 1
-  generateLightPieces: 0
-  generateIcePieces: 1
-  generateLeafPieces: 0
+  generateDarkPieces: 0
+  generateLightPieces: 1
+  generateIcePieces: 0
+  generateLeafPieces: 1
   minMatchAmount: 3
   speedVerticalFall: 2
   piecesGenerated: 0

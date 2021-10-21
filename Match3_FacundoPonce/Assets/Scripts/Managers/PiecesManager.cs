@@ -137,7 +137,20 @@ public class PiecesManager : MonoBehaviour
             }
             else
             {
-                GenerateGrid2Colors();
+                if(indicesPiecesToSpawm.Count == 2)
+                    GenerateGrid2Colors();
+                else if(indicesPiecesToSpawm.Count != 0)
+                {
+                    int randomPrefPiece=0;
+                    do
+                    {
+                        randomPrefPiece = Random.Range(0, prefabsPieces.Count);
+                    } while (randomPrefPiece == indicesPiecesToSpawm[0]);
+
+                    indicesPiecesToSpawm.Add(randomPrefPiece);
+                    prefabsPieces[randomPrefPiece].spawnAviable = true;
+                    GenerateGrid2Colors();
+                }
             }
             piecesGenerated = true;
         }
@@ -428,6 +441,8 @@ public class PiecesManager : MonoBehaviour
     {
         if (!chainBegin)
         {
+            StopAllCoroutines();
+            
             chainBegin = true;
             matchingPieces.Push(piece);
             newPointLine?.Invoke(matchingPieces.Count);
@@ -485,7 +500,8 @@ public class PiecesManager : MonoBehaviour
             GameManager.Instance.IncreaceScoreMultipler(matchingPieces.Count, minMatchAmount);
 
             RemoveMatchedPieces();
-            autoSortAndMatch = true;
+
+            StartCoroutine(DelayToSortGrid());
 
             clearLineMatches?.Invoke();
 
@@ -516,6 +532,15 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
+    IEnumerator DelayToSortGrid()
+    {
+        yield return new WaitForSeconds(0.6f);
+
+        autoSortAndMatch = true;
+
+        yield return null;
+    }
+
     void RemoveMatchedPieces()
     {
         int amountMatchPieces = matchingPieces.Count;
@@ -525,9 +550,6 @@ public class PiecesManager : MonoBehaviour
             if (peekPieceAnim != null)
                 peekPieceAnim.SetBool("Destroy", true);
 
-            //Vector3 newPositionPiece = new Vector3(matchingPieces.Peek().myNode.transform.position.x, matchingPieces.Peek().myNode.transform.position.y + piecesY);
-            //PieceType piece = Instantiate(CreateDifferentPiece(matchingPieces.Peek().pieceType), newPositionPiece, Quaternion.identity, piecesParent);
-            
             nodesEmpty.Add(matchingPieces.Peek().myNode);
             matchingPieces.Peek().myNode.SetPieceOnNode(null);
             matchingPieces.Pop();
@@ -588,14 +610,53 @@ public class PiecesManager : MonoBehaviour
                     PieceType pieceToCreate = Instantiate(prefabsPieces[indicesPiecesToSpawm[randPiece]], grid.gridNodes[i, 0].transform.position, Quaternion.identity, piecesParent);
                     grid.gridNodes[i, 0].SetPieceOnNode(pieceToCreate);
                     pieceToCreate.myNode = grid.gridNodes[i, 0];
+
+                    Animator pieceCreatedAnimator = pieceToCreate.GetComponent<Animator>();
+                    if(pieceCreatedAnimator != null)
+                        pieceCreatedAnimator.SetBool("HidePiece", true);
+
+                    StartCoroutine(DelayToShowPieceFirstRow(pieceCreatedAnimator));
                 }
             }
         }
+
+        StartCoroutine(CheckIfStillEmptyNodes());
     }
 
-    void CheckMatchWhenSort()
+    IEnumerator DelayToShowPieceFirstRow(Animator pieceCreatedAnimator)
     {
-        
+        yield return new WaitForSeconds(0.1f);
+
+        if (pieceCreatedAnimator != null)
+            pieceCreatedAnimator.SetBool("HidePiece", false);
+
+        yield return null;
+    }
+
+    IEnumerator CheckIfStillEmptyNodes()
+    {
+        yield return new WaitForSeconds(.5f);
+
+        int piecesChecked = 0;
+
+        for (int i = 0; i < piecesY; i++)
+        {
+            for (int j = 0; j < piecesX; j++)
+            {
+                if(grid.gridNodes[j,i] != null)
+                {
+                    if(grid.gridNodes[j, i].GetPiece() != null)
+                    {
+                        piecesChecked++;
+                    }
+                }
+            }
+        }
+
+        if (piecesChecked == piecesX * piecesY)
+            autoSortAndMatch = false;
+
+        yield return null;
     }
 
     void CreatePiecesAndRestoreTop()
@@ -607,13 +668,17 @@ public class PiecesManager : MonoBehaviour
     {
         float timeToEnd = 0;
 
-        while (piece.transform.position != targetPosition)
+        if (piece != null)
         {
-            timeToEnd += Time.deltaTime * speedVerticalFall;
+            while (piece.transform.position != targetPosition)
+            {
+                timeToEnd += Time.deltaTime * speedVerticalFall;
 
-            piece.transform.position = Vector3.Lerp(initialPosition, targetPosition, timeToEnd);
+                if (piece != null)
+                    piece.transform.position = Vector3.Lerp(initialPosition, targetPosition, timeToEnd);
 
-            yield return new WaitForEndOfFrame();
+                yield return new WaitForEndOfFrame();
+            }
         }
         yield return null;
     }

@@ -6,10 +6,12 @@ using UnityEngine.Events;
 public class PlayerController : MonoBehaviour
 {
     public bool draging;
+    CircleCollider2D coll;
 
     private void Start()
     {
         Cursor.visible = false;
+        coll = gameObject.GetComponent<CircleCollider2D>();
     }
     void Update()
     {
