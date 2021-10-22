@@ -76,6 +76,8 @@ public class PiecesManager : MonoBehaviour
     public bool autoSortGrid;
     public int maxCallsToMakeAutoMatch;
     public int callsOfMakeAutoMatch;
+    public int flagScoreIncrement;
+    int flagCheckForAutoMatches;
 
     int directions = 8;
     int directionsAutoMatch = 4;
@@ -101,6 +103,8 @@ public class PiecesManager : MonoBehaviour
         piecesCreated = 0;
         maxCallsToMakeAutoMatch = 1;
         callsOfMakeAutoMatch = 0;
+        flagScoreIncrement = 0;
+        flagCheckForAutoMatches = 0;
         chainBegin = false;
         piecesGenerated = false;
         canMakeAutoMatch = false;
@@ -173,7 +177,11 @@ public class PiecesManager : MonoBehaviour
         }
         else
         {
-            CheckForAutoMatchesOnGrid();
+            if(flagCheckForAutoMatches == 0)
+            {
+                CheckForAutoMatchesOnGrid();
+                flagCheckForAutoMatches = 1;
+            }
         }
 
         if (autoSortGrid)
@@ -230,14 +238,14 @@ public class PiecesManager : MonoBehaviour
             }
         }
 
-        RemoveLastPiecesAutoMatched();
+        RemoveTrashPiecesAutoMatched();
 
         matchingPieces.Clear();
         automaticMatches.Clear();
         piecesGenerated = false;
     }
 
-    void RemoveLastPiecesAutoMatched()
+    void RemoveTrashPiecesAutoMatched()
     {
         for (int i = 0; i < automaticMatches.Count; i++)
         {
@@ -700,10 +708,15 @@ public class PiecesManager : MonoBehaviour
             GameManager.Instance.BlockPlayerInteractions();
         }
 
+        int finalScoreToAdd = 0;
+        int maxAmountAutoMatch=0;
+
         for (int i = 0; i < automaticMatches.Count; i++)
         {
-            GameManager.Instance.IncreaceScoreMultipler(automaticMatches[i].Count, minMatchAmount);
             AudioManager.Instance.Play("Match");
+
+            if (maxAmountAutoMatch < automaticMatches[i].Count)
+                maxAmountAutoMatch = automaticMatches[i].Count;
 
             while (automaticMatches[i].Count > 0)
             {
@@ -726,30 +739,26 @@ public class PiecesManager : MonoBehaviour
                 {
                     break;
                 }
-                //else
-                //{
-                //    if(automaticMatches[i].Peek() != null)
-                //    {
-                //        if(!nodesEmpty.Contains(automaticMatches[i].Peek()))
-                //            nodesEmpty.Add(automaticMatches[i].Peek());
-                //        
-                //        automaticMatches[i].Pop();
-                //        yield return null;
-                //    }
-                //    else
-                //    {
-                //        automaticMatches[i].Clear();
-                //        yield return null;
-                //    }
-                //}
             }
         }
+
+        finalScoreToAdd = automaticMatches.Count * (maxAmountAutoMatch);
+        CalcAmountSocreOnAutoMatch(finalScoreToAdd);
 
         GameManager.Instance.UnblockPlayerInteractions();
         onMatchingProcess = false;
         automaticMatches.Clear();
 
         yield return null;
+    }
+
+    void CalcAmountSocreOnAutoMatch(int score)
+    {
+        if(flagScoreIncrement == 0)
+        {
+            GameManager.Instance.IncreaceScoreMultipler(score, minMatchAmount);
+            flagScoreIncrement = 1;
+        }
     }
 
     void FindEmptyNodes()
@@ -817,7 +826,6 @@ public class PiecesManager : MonoBehaviour
                 }
             }
         }
-
         StartCoroutine(CheckIfStillEmptyNodes());
     }
 
@@ -837,6 +845,7 @@ public class PiecesManager : MonoBehaviour
     {
         yield return new WaitForSeconds(.5f);
 
+        flagCheckForAutoMatches = 0;
         int piecesChecked = 0;
 
         for (int i = 0; i < piecesY; i++)
@@ -860,6 +869,7 @@ public class PiecesManager : MonoBehaviour
             if(!onMatchingProcess && automaticMatches.Count > 0)
             {
                 callsOfMakeAutoMatch = 0;
+                flagScoreIncrement = 0;
                 canMakeAutoMatch = true;
             }
             nodesEmpty.Clear();

@@ -497,10 +497,14 @@ MonoBehaviour:
   minMatchAmount: 3
   speedVerticalFall: 0
   piecesGenerated: 0
-  chainBegin: 0
-  autoSortGrid: 0
   piecesCreated: 0
+  chainBegin: 0
   piecesParent: {fileID: 0}
+  canMakeAutoMatch: 0
+  onMatchingProcess: 0
+  autoSortGrid: 0
+  maxCallsToMakeAutoMatch: 0
+  callsOfMakeAutoMatch: 0
   createPiecesAfterSort: 0
 --- !u!114 &105643686
 MonoBehaviour:
@@ -3023,10 +3027,14 @@ MonoBehaviour:
   minMatchAmount: 3
   speedVerticalFall: 2
   piecesGenerated: 0
-  chainBegin: 0
-  autoSortGrid: 0
   piecesCreated: 0
+  chainBegin: 0
   piecesParent: {fileID: 1377683788}
+  canMakeAutoMatch: 0
+  onMatchingProcess: 0
+  autoSortGrid: 0
+  maxCallsToMakeAutoMatch: 0
+  callsOfMakeAutoMatch: 0
   createPiecesAfterSort: 0
 --- !u!114 &2071454715
 MonoBehaviour:
@@ -3310,7 +3318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: amountTurns
-      value: 3
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: scoreEarnByMatch
