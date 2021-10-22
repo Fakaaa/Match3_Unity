@@ -5,6 +5,7 @@ using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] Camera mainCamera;
     public bool draging;
     CircleCollider2D coll;
 
@@ -39,7 +40,7 @@ public class PlayerController : MonoBehaviour
 
     public void UpdatePosition()
     {
-        transform.position = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));
+        transform.position = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

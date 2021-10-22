@@ -498,12 +498,10 @@ MonoBehaviour:
   speedVerticalFall: 0
   piecesGenerated: 0
   chainBegin: 0
-  autoSortAndMatch: 0
+  autoSortGrid: 0
   piecesCreated: 0
   piecesParent: {fileID: 0}
   createPiecesAfterSort: 0
-  amountTimesMatches: 0
-  maxAutoMatches: 0
 --- !u!114 &105643686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2768,6 +2766,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84e07565d0c1a274c997e41905010bb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 519420031}
   draging: 0
 --- !u!58 &1672638311
 CircleCollider2D:
@@ -3025,12 +3024,10 @@ MonoBehaviour:
   speedVerticalFall: 2
   piecesGenerated: 0
   chainBegin: 0
-  autoSortAndMatch: 0
+  autoSortGrid: 0
   piecesCreated: 0
   piecesParent: {fileID: 1377683788}
   createPiecesAfterSort: 0
-  amountTimesMatches: 0
-  maxAutoMatches: 1
 --- !u!114 &2071454715
 MonoBehaviour:
   m_ObjectHideFlags: 0

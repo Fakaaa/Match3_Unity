@@ -48,11 +48,8 @@ public class PiecesManager : MonoBehaviour
     //[SerializeField] public List<PieceType> piecesOnGrid;
 
     public bool piecesGenerated;
-    public bool chainBegin;
-
-    public bool autoSortGrid;
-
     public int piecesCreated;
+    public bool chainBegin;
 
     public Transform piecesParent;
 
@@ -74,7 +71,12 @@ public class PiecesManager : MonoBehaviour
     Vector2[] indexDirectionsPieceStack;
 
     Vector2[] indexDirectionsAutomaticMatch;
-    bool autoMatchingPieces;
+    public bool canMakeAutoMatch;
+    public bool onMatchingProcess;
+    public bool autoSortGrid;
+    public int maxCallsToMakeAutoMatch;
+    public int callsOfMakeAutoMatch;
+
     int directions = 8;
     int directionsAutoMatch = 4;
 
@@ -97,9 +99,12 @@ public class PiecesManager : MonoBehaviour
     private void Start()
     {
         piecesCreated = 0;
+        maxCallsToMakeAutoMatch = 1;
+        callsOfMakeAutoMatch = 0;
         chainBegin = false;
         piecesGenerated = false;
-        autoMatchingPieces = false;
+        canMakeAutoMatch = false;
+        onMatchingProcess = false;
 
         grid = gameObject.GetComponent<GridBehaviour>();
         stateGrid = gameObject.GetComponent<GridState>();
@@ -156,16 +161,26 @@ public class PiecesManager : MonoBehaviour
             piecesGenerated = true;
         }
 
+        if (canMakeAutoMatch)
+        {
+            MakeAutomaticMatch();
+
+            if (!onMatchingProcess)
+            {
+                StartCoroutine(DelayToSortGrid());
+                canMakeAutoMatch = false;
+            }
+        }
+        else
+        {
+            CheckForAutoMatchesOnGrid();
+        }
+
         if (autoSortGrid)
         {
             FindEmptyNodes();
 
             FillFirstRowWithPieces();
-        }
-            
-        if(autoMatchingPieces)
-        {
-            MakeAutomaticMatch();
         }
     }
 
@@ -193,11 +208,15 @@ public class PiecesManager : MonoBehaviour
 
     public void ResetTheGridPieces()
     {
+        StopAllCoroutines();
+
         piecesCreated = 0;
+        callsOfMakeAutoMatch = 0;
+
         chainBegin = false;
         autoSortGrid = false;
-
-        StopAllCoroutines();
+        onMatchingProcess = false;
+        canMakeAutoMatch = false;
 
         for (int i = 0; i < piecesY; i++)
         {
@@ -211,9 +230,33 @@ public class PiecesManager : MonoBehaviour
             }
         }
 
+        RemoveLastPiecesAutoMatched();
+
         matchingPieces.Clear();
         automaticMatches.Clear();
         piecesGenerated = false;
+    }
+
+    void RemoveLastPiecesAutoMatched()
+    {
+        for (int i = 0; i < automaticMatches.Count; i++)
+        {
+            while (automaticMatches[i].Count > 0)
+            {
+                if (automaticMatches[i] != null)
+                {
+                    if (automaticMatches[i].Peek().GetPiece() != null)
+                    {
+                        Destroy(automaticMatches[i].Peek().GetPiece().gameObject);
+                        automaticMatches[i].Pop();
+                    }
+                    else
+                    {
+                        automaticMatches[i].Pop();
+                    }
+                }
+            }
+        }
     }
 
     #region Clear and Filter Pre-Mathces before starts gameplay
@@ -536,6 +579,8 @@ public class PiecesManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.6f);
 
+        //StopCoroutine(MakeAutoMatch());
+        GameManager.Instance.BlockPlayerInteractions();
         autoSortGrid = true;
 
         yield return null;
@@ -556,19 +601,33 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
-    void MakeAutomaticMatch()
+    void CheckForAutoMatchesOnGrid()
     {
-        for (int i = 0; i < piecesY; i++)
+        if (autoSortGrid || onMatchingProcess)
+            return;
+
+        for (int i = 1; i < piecesY; i++)
         {
             for (int j = 0; j < piecesX; j++)
             {
-                Stack<NodeGrid> mathcesHorizontal = new Stack<NodeGrid>();
-                CheckAutoMatchHorizontal(grid.gridNodes[j,i], mathcesHorizontal);
+                if (!onMatchingProcess)
+                {
+                    Stack<NodeGrid> mathcesHorizontal = new Stack<NodeGrid>();
+                    CheckAutoMatchHorizontal(grid.gridNodes[j, i], mathcesHorizontal);
+                }
+                else
+                    return;
             }
         }
+    }
 
-        StartCoroutine(MakeAutoMatch());
-        autoMatchingPieces = false;
+    void MakeAutomaticMatch()
+    {
+        if (automaticMatches.Count <= 0)
+            return;
+
+        if(callsOfMakeAutoMatch < maxCallsToMakeAutoMatch)
+            StartCoroutine(MakeAutoMatch());
     }
 
     void CheckAutoMatchHorizontal(NodeGrid nodeToCheck, Stack<NodeGrid> matchDetected)
@@ -585,25 +644,36 @@ public class PiecesManager : MonoBehaviour
 
                     if(rightNode != null && indexDirectionsAutomaticMatch[i] != null && nodeToCheck != null)
                     {
-                        if (rightNode.GetGridPos().x == indexDirectionsAutomaticMatch[i].x && 
-                            rightNode.GetPiece().pieceType == nodeToCheck.GetPiece().pieceType)
+                        if(rightNode.GetPiece() != null && nodeToCheck.GetPiece() != null)
                         {
-                            if (!matchDetected.Contains(nodeToCheck))
-                                matchDetected.Push(nodeToCheck);
-
-                            if (!matchDetected.Contains(rightNode))
-                                matchDetected.Push(rightNode);
-
-                            CheckAutoMatchHorizontal(rightNode, matchDetected);
-                        }
-                        else
-                        {
-                            if (matchDetected.Count < minMatchAmount)
-                                matchDetected.Clear();
-                            else if(matchDetected.Count >= minMatchAmount)
+                            if (rightNode.GetGridPos().x == indexDirectionsAutomaticMatch[i].x && 
+                                rightNode.GetPiece().pieceType == nodeToCheck.GetPiece().pieceType)
                             {
-                                if (!automaticMatches.Contains(matchDetected))
-                                    automaticMatches.Add(matchDetected);
+                                if (!matchDetected.Contains(nodeToCheck))
+                                {
+                                    matchDetected.Push(nodeToCheck);
+                                }
+
+                                if (!matchDetected.Contains(rightNode))
+                                {
+                                    matchDetected.Push(rightNode);
+                                }
+
+                                CheckAutoMatchHorizontal(rightNode, matchDetected);
+                            }
+                            else
+                            {
+                                if (matchDetected.Count < minMatchAmount)
+                                {
+                                    matchDetected.Clear();
+                                }
+                                else if(matchDetected.Count >= minMatchAmount)
+                                {
+                                    if (!automaticMatches.Contains(matchDetected))
+                                    {
+                                        automaticMatches.Add(matchDetected);
+                                    }
+                                }
                             }
                         }
                     }
@@ -614,17 +684,21 @@ public class PiecesManager : MonoBehaviour
 
     IEnumerator MakeAutoMatch()
     {
-        yield return new WaitForSeconds(.5f);
+        onMatchingProcess = true;
+        callsOfMakeAutoMatch++;
+        Debug.Log("ENTRO");
 
-        if(GameManager.Instance.amountTurns <= 0)
+        if (GameManager.Instance.amountTurns <= 0)
         {
             automaticMatches.Clear();
             GameManager.Instance.UnblockPlayerInteractions();
-            yield return null;
+            StopAllCoroutines();
         }
 
         if (automaticMatches.Count > 0)
+        {
             GameManager.Instance.BlockPlayerInteractions();
+        }
 
         for (int i = 0; i < automaticMatches.Count; i++)
         {
@@ -638,28 +712,42 @@ public class PiecesManager : MonoBehaviour
                     PieceType pieceDestroyed = automaticMatches[i].Peek().GetPiece();
                     automaticMatches[i].Peek().SetPieceOnNode(null);
                     nodesEmpty.Add(automaticMatches[i].Peek());
-                    pieceDestroyed.myNode = null;
 
                     Animator peekPieceAnimator = pieceDestroyed.GetComponent<Animator>();
                     if (peekPieceAnimator != null)
+                    {
                         peekPieceAnimator.SetBool("Destroy", true);
-                    else
-                        Debug.Log("NULO");
+                    }
 
                     automaticMatches[i].Pop();
                     yield return new WaitForEndOfFrame();
                 }
-
-                yield return null;
+                else
+                {
+                    break;
+                }
+                //else
+                //{
+                //    if(automaticMatches[i].Peek() != null)
+                //    {
+                //        if(!nodesEmpty.Contains(automaticMatches[i].Peek()))
+                //            nodesEmpty.Add(automaticMatches[i].Peek());
+                //        
+                //        automaticMatches[i].Pop();
+                //        yield return null;
+                //    }
+                //    else
+                //    {
+                //        automaticMatches[i].Clear();
+                //        yield return null;
+                //    }
+                //}
             }
         }
 
-
-        automaticMatches.Clear();
-
-        yield return StartCoroutine(CheckIfStillEmptyNodes());
-
         GameManager.Instance.UnblockPlayerInteractions();
+        onMatchingProcess = false;
+        automaticMatches.Clear();
 
         yield return null;
     }
@@ -715,7 +803,9 @@ public class PiecesManager : MonoBehaviour
                 if(grid.gridNodes[j, 0].GetPiece() == null)
                 {
                     int randPiece = Random.Range(0, indicesPiecesToSpawm.Count);
+
                     PieceType pieceToCreate = Instantiate(prefabsPieces[indicesPiecesToSpawm[randPiece]], grid.gridNodes[j, 0].transform.position, Quaternion.identity, piecesParent);
+                    
                     grid.gridNodes[j, 0].SetPieceOnNode(pieceToCreate);
                     pieceToCreate.myNode = grid.gridNodes[j, 0];
 
@@ -736,7 +826,9 @@ public class PiecesManager : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         if (pieceCreatedAnimator != null)
+        {
             pieceCreatedAnimator.SetBool("HidePiece", false);
+        }
 
         yield return null;
     }
@@ -764,12 +856,13 @@ public class PiecesManager : MonoBehaviour
         if (piecesChecked == piecesX * piecesY)
         {
             autoSortGrid = false;
-            autoMatchingPieces = true;
+            GameManager.Instance.UnblockPlayerInteractions();
+            if(!onMatchingProcess && automaticMatches.Count > 0)
+            {
+                callsOfMakeAutoMatch = 0;
+                canMakeAutoMatch = true;
+            }
             nodesEmpty.Clear();
-        }
-        else
-        {
-            autoSortGrid = true;
         }
 
         yield return null;
@@ -781,12 +874,14 @@ public class PiecesManager : MonoBehaviour
 
         if (piece != null)
         {
-            while (piece.transform.position != targetPosition)
+            while (piece != null && piece.transform.position != targetPosition)
             {
                 timeToEnd += Time.deltaTime * speedVerticalFall;
 
                 if (piece != null)
+                {
                     piece.transform.position = Vector3.Lerp(initialPosition, targetPosition, timeToEnd);
+                }
 
                 yield return new WaitForEndOfFrame();
             }
@@ -856,23 +951,33 @@ public class PiecesManager : MonoBehaviour
                 (nodeOutStack.GetGridPos().y >= 0 || nodeOutStack.GetGridPos().y < piecesY))
             {
                 if (nodeOutStack.GetGridPos() == indexDirectionsPieceStack[i])
+                {
                     return true;
+                }
             }
             else
+            {
                 return false;
+            }
         }
         return false;
     }
 
     void SetDirectionsNode(int directionIndex,Vector2 directionGrid)
     {
-        if ((directionGrid.x >= 0 || directionGrid.x < piecesX) && (directionGrid.y >= 0 || directionGrid.y < piecesY))
+        if ((directionGrid.x >= 0 || directionGrid.x < piecesX) 
+            && (directionGrid.y >= 0 || directionGrid.y < piecesY))
+        {
             indexDirectionsPieceStack[directionIndex] = directionGrid;
+        }
     }
 
     void SetDirectionsNodeAutoMatch(int directionIndex, Vector2 directionGrid)
     {
-        if ((directionGrid.x >= 0 || directionGrid.x < piecesX) && (directionGrid.y >= 0 || directionGrid.y < piecesY))
+        if ((directionGrid.x >= 0 || directionGrid.x < piecesX) 
+            && (directionGrid.y >= 0 || directionGrid.y < piecesY))
+        {
             indexDirectionsAutomaticMatch[directionIndex] = directionGrid;
+        }
     }
 }
