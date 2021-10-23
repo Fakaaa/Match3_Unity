@@ -80,7 +80,7 @@ public class PiecesManager : MonoBehaviour
     int flagCheckForAutoMatches;
 
     int directions = 8;
-    int directionsAutoMatch = 4;
+    int directionsAutoMatch = 2;
 
     public delegate void CreateNewPoint(int actualIndex);
     public CreateNewPoint newPointLine;
@@ -588,7 +588,6 @@ public class PiecesManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.6f);
 
-        //StopCoroutine(MakeAutoMatch());
         GameManager.Instance.BlockPlayerInteractions();
         autoSortGrid = true;
 
@@ -621,6 +620,8 @@ public class PiecesManager : MonoBehaviour
             {
                 if (!onMatchingProcess)
                 {
+                    Stack<NodeGrid> mathcesVertical = new Stack<NodeGrid>();
+                    CheckAutoMatchVertical(grid.gridNodes[j, i], mathcesVertical);
                     Stack<NodeGrid> mathcesHorizontal = new Stack<NodeGrid>();
                     CheckAutoMatchHorizontal(grid.gridNodes[j, i], mathcesHorizontal);
                 }
@@ -639,49 +640,95 @@ public class PiecesManager : MonoBehaviour
             StartCoroutine(MakeAutoMatch());
     }
 
-    void CheckAutoMatchHorizontal(NodeGrid nodeToCheck, Stack<NodeGrid> matchDetected)
+    void CheckAutoMatchHorizontal(NodeGrid actualNode, Stack<NodeGrid> matchDetected)
     {
-        if(nodeToCheck != null)
+        if(actualNode != null)
         {
-            CalcHorzValuesIndexDirectionStack(nodeToCheck);
+            CalcHorzValuesIndexDirectionStack(actualNode);
 
-            for (int i = 2; i < directionsAutoMatch; i++)
+            if(actualNode.GetGridPos().x +1 < piecesX )
             {
-                if(nodeToCheck.GetGridPos().x +1 < piecesX )
+                NodeGrid rightNode = grid.gridNodes[(int)actualNode.GetGridPos().x + 1, (int)actualNode.GetGridPos().y];
+
+                if(rightNode != null && indexDirectionsAutomaticMatch[1] != null && actualNode != null)
                 {
-                    NodeGrid rightNode = grid.gridNodes[(int)nodeToCheck.GetGridPos().x + 1, (int)nodeToCheck.GetGridPos().y];
-
-                    if(rightNode != null && indexDirectionsAutomaticMatch[i] != null && nodeToCheck != null)
+                    if(rightNode.GetPiece() != null && actualNode.GetPiece() != null)
                     {
-                        if(rightNode.GetPiece() != null && nodeToCheck.GetPiece() != null)
+                        if (rightNode.GetGridPos().x == indexDirectionsAutomaticMatch[1].x && 
+                            rightNode.GetPiece().pieceType == actualNode.GetPiece().pieceType)
                         {
-                            if (rightNode.GetGridPos().x == indexDirectionsAutomaticMatch[i].x && 
-                                rightNode.GetPiece().pieceType == nodeToCheck.GetPiece().pieceType)
+                            if (!matchDetected.Contains(actualNode))
                             {
-                                if (!matchDetected.Contains(nodeToCheck))
-                                {
-                                    matchDetected.Push(nodeToCheck);
-                                }
-
-                                if (!matchDetected.Contains(rightNode))
-                                {
-                                    matchDetected.Push(rightNode);
-                                }
-
-                                CheckAutoMatchHorizontal(rightNode, matchDetected);
+                                matchDetected.Push(actualNode);
                             }
-                            else
+
+                            if (!matchDetected.Contains(rightNode))
                             {
-                                if (matchDetected.Count < minMatchAmount)
+                                matchDetected.Push(rightNode);
+                            }
+
+                            CheckAutoMatchHorizontal(rightNode, matchDetected);
+                        }
+                        else
+                        {
+                            if (matchDetected.Count < minMatchAmount)
+                            {
+                                matchDetected.Clear();
+                            }
+                            else if(matchDetected.Count >= minMatchAmount)
+                            {
+                                if (!automaticMatches.Contains(matchDetected))
                                 {
-                                    matchDetected.Clear();
+                                    automaticMatches.Add(matchDetected);
                                 }
-                                else if(matchDetected.Count >= minMatchAmount)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void CheckAutoMatchVertical(NodeGrid actualNode, Stack<NodeGrid> matchDetected)
+    {
+        if (actualNode != null)
+        {
+            CalcVertValuesIndexDirectionStack(actualNode);
+
+            if (actualNode.GetGridPos().y + 1 < piecesY)
+            {
+                NodeGrid downNode = grid.gridNodes[(int)actualNode.GetGridPos().x, (int)actualNode.GetGridPos().y + 1];
+
+                if (downNode != null && indexDirectionsAutomaticMatch[0] != null && actualNode != null)
+                {
+                    if (downNode.GetPiece() != null && actualNode.GetPiece() != null)
+                    {
+                        if (downNode.GetGridPos().y == indexDirectionsAutomaticMatch[0].y &&
+                            downNode.GetPiece().pieceType == actualNode.GetPiece().pieceType)
+                        {
+                            if (!matchDetected.Contains(actualNode))
+                            {
+                                matchDetected.Push(actualNode);
+                            }
+
+                            if (!matchDetected.Contains(downNode))
+                            {
+                                matchDetected.Push(downNode);
+                            }
+
+                            CheckAutoMatchVertical(downNode, matchDetected);
+                        }
+                        else
+                        {
+                            if (matchDetected.Count < minMatchAmount)
+                            {
+                                matchDetected.Clear();
+                            }
+                            else if (matchDetected.Count >= minMatchAmount)
+                            {
+                                if (!automaticMatches.Contains(matchDetected))
                                 {
-                                    if (!automaticMatches.Contains(matchDetected))
-                                    {
-                                        automaticMatches.Add(matchDetected);
-                                    }
+                                    automaticMatches.Add(matchDetected);
                                 }
                             }
                         }
@@ -918,18 +965,14 @@ public class PiecesManager : MonoBehaviour
 
     void CalcVertValuesIndexDirectionStack(NodeGrid pieceNode)
     {
-        //Arriba
-        SetDirectionsNodeAutoMatch(0, new Vector2(pieceNode.GetGridPos().x, pieceNode.GetGridPos().y - 1));
         //Abajo
-        SetDirectionsNodeAutoMatch(1, new Vector2(pieceNode.GetGridPos().x, pieceNode.GetGridPos().y + 1));
+        SetDirectionsNodeAutoMatch(0, new Vector2(pieceNode.GetGridPos().x, pieceNode.GetGridPos().y + 1));
     }
 
     void CalcHorzValuesIndexDirectionStack(NodeGrid pieceNode)
     {
         //Derecha
-        SetDirectionsNodeAutoMatch(2, new Vector2(pieceNode.GetGridPos().x + 1, pieceNode.GetGridPos().y));
-        //Izquierda
-        SetDirectionsNodeAutoMatch(3, new Vector2(pieceNode.GetGridPos().x - 1, pieceNode.GetGridPos().y));
+        SetDirectionsNodeAutoMatch(1, new Vector2(pieceNode.GetGridPos().x + 1, pieceNode.GetGridPos().y));
     }
 
     void SaveDirectionsPiece(NodeGrid pieceNode)
