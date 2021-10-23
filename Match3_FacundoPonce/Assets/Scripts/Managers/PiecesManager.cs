@@ -138,7 +138,13 @@ public class PiecesManager : MonoBehaviour
         if (grid.amountNodesGenerated < piecesX * piecesY)
             return;
 
-        if(!piecesGenerated)
+        if (GameManager.Instance.amountTurns <= 0)
+        {
+            StopAllCoroutines();
+            GameManager.Instance.BlockPlayerInteractions();
+        }
+
+        if (!piecesGenerated)
         {
             if (indicesPiecesToSpawm.Count > 2)
             {
@@ -923,6 +929,7 @@ public class PiecesManager : MonoBehaviour
             {
                 GameManager.Instance.UnblockPlayerInteractions();
             }
+
             nodesEmpty.Clear();
         }
 
