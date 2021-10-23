@@ -505,6 +505,7 @@ MonoBehaviour:
   autoSortGrid: 0
   maxCallsToMakeAutoMatch: 0
   callsOfMakeAutoMatch: 0
+  flagScoreIncrement: 0
   createPiecesAfterSort: 0
 --- !u!114 &105643686
 MonoBehaviour:
@@ -2989,8 +2990,8 @@ MonoBehaviour:
   prefabGridNode: {fileID: 501107933941053028, guid: d6605e873a4277144a27943fa1a969bc, type: 3}
   spacingX: 1
   spacingY: 1
-  amountPiecesX: 14
-  amountPiecesY: 6
+  amountPiecesX: 10
+  amountPiecesY: 7
   nodesGenerated: 0
   amountNodesGenerated: 0
   initialPosition: {x: 0, y: 0, z: 0}
@@ -3025,7 +3026,7 @@ MonoBehaviour:
   generateIcePieces: 0
   generateLeafPieces: 1
   minMatchAmount: 3
-  speedVerticalFall: 2
+  speedVerticalFall: 6
   piecesGenerated: 0
   piecesCreated: 0
   chainBegin: 0
@@ -3035,6 +3036,7 @@ MonoBehaviour:
   autoSortGrid: 0
   maxCallsToMakeAutoMatch: 0
   callsOfMakeAutoMatch: 0
+  flagScoreIncrement: 0
   createPiecesAfterSort: 0
 --- !u!114 &2071454715
 MonoBehaviour:
@@ -3318,7 +3320,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: amountTurns
-      value: 6
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 9118577911168733956, guid: 16f03bbf4b9c13c47a457957a0bfce3a, type: 3}
       propertyPath: scoreEarnByMatch

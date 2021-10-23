@@ -62,8 +62,8 @@ public class PlayerController : MonoBehaviour
                 draging = true;
                 piece.StartChainAndPressPiece();
             }
-            if (!draging && PiecesManager.Instance.matchingPieces.Count <= 1)
-                piece.RemoveFromChain();
+            //if (!draging && PiecesManager.Instance.matchingPieces.Count < 1)
+            //    piece.RemoveFromChain();
         }
     }
 
