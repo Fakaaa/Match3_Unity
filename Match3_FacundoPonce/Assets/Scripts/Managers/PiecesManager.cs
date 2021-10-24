@@ -45,7 +45,6 @@ public class PiecesManager : MonoBehaviour
     [Header("PIECES CONFIG AND REFERENCES")]
     [SerializeField] public int minMatchAmount;
     [SerializeField] float speedVerticalFall;
-    //[SerializeField] public List<PieceType> piecesOnGrid;
 
     public bool piecesGenerated;
     public int piecesCreated;
@@ -53,9 +52,9 @@ public class PiecesManager : MonoBehaviour
 
     public Transform piecesParent;
 
-    List<NodeGrid> preMatchesVertical;
-    List<NodeGrid> preMatchesHorizontal;
-
+    List<Stack<NodeGrid>> preMatchesVertical;
+    List<Stack<NodeGrid>> preMatchesHorizontal;
+    int cleanPrematchesIterations = 5;
 
     List<Stack<NodeGrid>> automaticMatches;
 
@@ -64,13 +63,20 @@ public class PiecesManager : MonoBehaviour
     int piecesX;
     int piecesY;
 
+    public enum DirectionCheck
+    {
+        Horizontal,
+        Vertical
+    }
+
     int indexLastPieceCreated = 0;
 
     public Stack<PieceType> matchingPieces;
 
     Vector2[] indexDirectionsPieceStack;
-
     Vector2[] indexDirectionsAutomaticMatch;
+    Vector2[] indexDirectionsPreMatch;
+
     public bool canMakeAutoMatch;
     public bool onMatchingProcess;
     public bool autoSortGrid;
@@ -117,14 +123,14 @@ public class PiecesManager : MonoBehaviour
 
         automaticMatches = new List<Stack<NodeGrid>>();
 
-        preMatchesVertical = new List<NodeGrid>();
-        preMatchesHorizontal = new List<NodeGrid>();
+        preMatchesVertical = new List<Stack<NodeGrid>>();
+        preMatchesHorizontal = new List<Stack<NodeGrid>>();
 
         nodesEmpty = new List<NodeGrid>();
 
-        //OLD
         indexDirectionsAutomaticMatch = new Vector2[directionsAutoMatch];
-        //NEW
+        indexDirectionsPreMatch = new Vector2[directionsAutoMatch];
+
         indexDirectionsPieceStack = new Vector2[directions];
 
         piecesX = grid.amountPiecesX;
@@ -149,25 +155,10 @@ public class PiecesManager : MonoBehaviour
             if (indicesPiecesToSpawm.Count > 2)
             {
                 StartCoroutine(GeneratePiecesCorutine());
-                //FilterPreMatchesOnGrid();
             }
             else
             {
-                if(indicesPiecesToSpawm.Count == 2)
-                    GenerateGrid2Colors();
-                else if(indicesPiecesToSpawm.Count != 0)
-                {
-                    int randomPrefPiece=0;
-                    do
-                    {
-                        randomPrefPiece = Random.Range(0, prefabsPieces.Count);
-                    } while (randomPrefPiece == indicesPiecesToSpawm[0]);
-
-                    indicesPiecesToSpawm.Add(randomPrefPiece);
-                    prefabsPieces[randomPrefPiece].spawnAviable = true;
-
-                    GenerateGrid2Colors();
-                }
+                ComputeGridWithOnlyTwoPiecesType();
             }
             piecesGenerated = true;
         }
@@ -199,6 +190,25 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
+    void ComputeGridWithOnlyTwoPiecesType()
+    {
+        if (indicesPiecesToSpawm.Count == 2)
+            GenerateGrid2Colors();
+        else if (indicesPiecesToSpawm.Count != 0)
+        {
+            int randomPrefPiece = 0;
+            do
+            {
+                randomPrefPiece = Random.Range(0, prefabsPieces.Count);
+            } while (randomPrefPiece == indicesPiecesToSpawm[0]);
+
+            indicesPiecesToSpawm.Add(randomPrefPiece);
+            prefabsPieces[randomPrefPiece].spawnAviable = true;
+
+            GenerateGrid2Colors();
+        }
+    }
+
     IEnumerator GeneratePiecesCorutine()
     {
         for (int i = 0; i < piecesY; i++)
@@ -218,6 +228,7 @@ public class PiecesManager : MonoBehaviour
             }
         }
         stateGrid.ShowGrid();
+        FilterPreMatchesOnGrid();
         yield return null;
     }
 
@@ -323,20 +334,30 @@ public class PiecesManager : MonoBehaviour
 
     void FilterPreMatchesOnGrid()
     {
-        //for (int i = 0; i < piecesY; i++)
-        //{
-        //    for (int j = 0; j < piecesX; j++)
-        //    {
-        //        CheckVerticalMatchRecursive(i,j);
+        for (int k = 0; k < cleanPrematchesIterations; k++)
+        {
+            for (int i = 0; i < piecesY; i++)
+            {
+                for (int j = 0; j < piecesX; j++)
+                {
+                    Stack<NodeGrid> stackVertical = new Stack<NodeGrid>();
+                    CheckVertAxisMatchRecursive(grid.gridNodes[j, i], stackVertical);
+                    Stack<NodeGrid> stackHorizontal = new Stack<NodeGrid>();
+                    CheckHorAxisMatchRecursive(grid.gridNodes[j, i], stackHorizontal);
+                }
+            }
 
-        //        if(CheckIfThereIsVerticalPreMatch())
-        //        {
-        //            NewPiecesVertical();
-        //        }
+            if (CheckIfThereIsVerticalPreMatch())
+            {
+                NewPiecesVertical();
+            }
+            if (CheckIfThereIsHorizontalPreMatch())
+            {
+                NewPiecesHorizontal();
+            }
 
-        //        ClearPreMatches();
-        //    }
-        //}
+            ClearPreMatches();
+        }
     }
 
     void GenerateGrid2Colors()
@@ -421,36 +442,54 @@ public class PiecesManager : MonoBehaviour
         return pieceToCreate;
     }
 
-    void CreatePieceFromCondition(bool condition, int iteration, List<NodeGrid> prematches)
+    void CreatePieceFromCondition(bool condition, NodeGrid actualNode)
     {
         if (condition)
         {
-            PieceType newPiece = Instantiate(CreateDifferentPiece(prematches[iteration].GetPiece().pieceType), prematches[iteration].transform.position, Quaternion.identity, piecesParent);
-            Destroy(prematches[iteration].GetPiece().gameObject);
-            prematches[iteration].SetPieceOnNode(newPiece);
-            newPiece.myNode = prematches[iteration];
+            PieceType newPiece = Instantiate(CreateDifferentPiece(actualNode.GetPiece().pieceType), actualNode.transform.position, Quaternion.identity, piecesParent);
+            Destroy(actualNode.GetPiece().gameObject);
+            actualNode.SetPieceOnNode(newPiece);
+            newPiece.myNode = actualNode;
         }
     }
 
     void NewPiecesHorizontal()
     {
+        int valueToDisorder = 0;
+
         for (int i = 0; i < preMatchesHorizontal.Count; i++)
         {
-            CreatePieceFromCondition(((i % 2) == 0), i, preMatchesHorizontal); //Rompe el match con una separacion par
+            while (preMatchesHorizontal[i].Count > 0)
+            {
+                CreatePieceFromCondition(((valueToDisorder % 2) == 0), preMatchesHorizontal[i].Peek()); //Rompe el match con una separacion par
+                preMatchesHorizontal[i].Pop();
+                valueToDisorder++;
+            }
+
+            valueToDisorder = 0;
         }
     }
 
     void NewPiecesVertical()
     {
+        int valueToDisorder = 0;
+
         for (int i = 0; i < preMatchesVertical.Count; i++)
         {
-            CreatePieceFromCondition(((i % 2) != 0), i, preMatchesVertical); //Rompe el match con una separacion inpar
+            while (preMatchesVertical[i].Count > 0)
+            {
+                CreatePieceFromCondition(((valueToDisorder % 2) != 0), preMatchesVertical[i].Peek()); //Rompe el match con una separacion inpar
+                preMatchesVertical[i].Pop();
+                valueToDisorder++;
+            }
+
+            valueToDisorder = 0;
         }
     }
 
     bool CheckIfThereIsVerticalPreMatch()
     {
-        if (preMatchesVertical.Count >= minMatchAmount)
+        if (preMatchesVertical.Count >= 1)
             return true;
         else
             return false;
@@ -458,20 +497,108 @@ public class PiecesManager : MonoBehaviour
 
     bool CheckIfThereIsHorizontalPreMatch()
     {
-        if (preMatchesHorizontal.Count >= minMatchAmount)
+        if (preMatchesHorizontal.Count >= 1)
             return true;
         else
             return false;
     }
 
-    void CheckHorizontalMatchRecursive(int columnsIter, int rowsIter)
+    void CheckVertAxisMatchRecursive(NodeGrid actualNode, Stack<NodeGrid> stackMatch)
     {
-        
+        if (actualNode != null)
+        {
+            CalcNearVerticalNodeIndices(actualNode);
+
+            if (actualNode.GetGridPos().y + 1 < piecesY)
+            {
+                NodeGrid nodeToCheck = grid.gridNodes[(int)actualNode.GetGridPos().x, (int)actualNode.GetGridPos().y + 1];
+
+                if (nodeToCheck != null && indexDirectionsPreMatch[0] != null && actualNode != null)
+                {
+                    if (nodeToCheck.GetPiece() != null && actualNode.GetPiece() != null)
+                    {
+                        if (nodeToCheck.GetGridPos().y == indexDirectionsPreMatch[0].y &&
+                            nodeToCheck.GetPiece().pieceType == actualNode.GetPiece().pieceType)
+                        {
+                            if (!stackMatch.Contains(actualNode))
+                            {
+                                stackMatch.Push(actualNode);
+                            }
+                            if (!stackMatch.Contains(nodeToCheck))
+                            {
+                                stackMatch.Push(nodeToCheck);
+                            }
+
+                            CheckVertAxisMatchRecursive(nodeToCheck, stackMatch);
+                        }
+                        else
+                        {
+                            if (stackMatch.Count < minMatchAmount)
+                            {
+                                stackMatch.Clear();
+                            }
+                            else if (stackMatch.Count >= minMatchAmount)
+                            {
+                                if (!preMatchesVertical.Contains(stackMatch))
+                                {
+                                    preMatchesVertical.Add(stackMatch);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    void CheckVerticalMatchRecursive(int rowsIter, int columnsIter)
+    void CheckHorAxisMatchRecursive(NodeGrid actualNode, Stack<NodeGrid> stackMatch)
     {
-        
+        if(actualNode != null)
+        {
+            CalcNearHorizontalNodeIndices(actualNode);
+
+            
+            if (actualNode.GetGridPos().x + 1 < piecesX)
+            {
+                NodeGrid nodeToCheck = grid.gridNodes[(int)actualNode.GetGridPos().x + 1, (int)actualNode.GetGridPos().y];
+
+                if(nodeToCheck != null && indexDirectionsPreMatch[1] != null && actualNode != null)
+                {
+                    if(nodeToCheck.GetPiece() != null && actualNode.GetPiece() != null)
+                    {
+
+                        if(nodeToCheck.GetGridPos().x == indexDirectionsPreMatch[1].x &&
+                            nodeToCheck.GetPiece().pieceType == actualNode.GetPiece().pieceType)
+                        {
+                            if (!stackMatch.Contains(actualNode))
+                            {
+                                stackMatch.Push(actualNode);
+                            }
+                            if (!stackMatch.Contains(nodeToCheck))
+                            {
+                                stackMatch.Push(nodeToCheck);
+                            }
+
+                            CheckHorAxisMatchRecursive(nodeToCheck, stackMatch);
+                        }
+                        else
+                        {
+                            if(stackMatch.Count < minMatchAmount)
+                            {
+                                stackMatch.Clear();
+                            }
+                            else if(stackMatch.Count >= minMatchAmount)
+                            {
+                                if(!preMatchesHorizontal.Contains(stackMatch))
+                                {
+                                    preMatchesHorizontal.Add(stackMatch);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void ClearPreMatches()
@@ -607,7 +734,7 @@ public class PiecesManager : MonoBehaviour
         {
             Animator peekPieceAnim = matchingPieces.Peek().GetComponent<Animator>();
             if (peekPieceAnim != null)
-                peekPieceAnim.SetBool("Destroy", true);
+                peekPieceAnim.SetBool("Destroy", true); //Esta animacion tiene un behaviour que hace un Destroy
 
             nodesEmpty.Add(matchingPieces.Peek().myNode);
             matchingPieces.Peek().myNode.SetPieceOnNode(null);
@@ -650,7 +777,7 @@ public class PiecesManager : MonoBehaviour
     {
         if(actualNode != null)
         {
-            CalcHorzValuesIndexDirectionStack(actualNode);
+            CalculateHorizontalIndexFromNode(actualNode);
 
             if(actualNode.GetGridPos().x +1 < piecesX )
             {
@@ -699,7 +826,7 @@ public class PiecesManager : MonoBehaviour
     {
         if (actualNode != null)
         {
-            CalcVertValuesIndexDirectionStack(actualNode);
+            CalculateVerticalIndexFromNode(actualNode);
 
             if (actualNode.GetGridPos().y + 1 < piecesY)
             {
@@ -868,7 +995,6 @@ public class PiecesManager : MonoBehaviour
 
                     PieceType pieceToCreate = Instantiate(prefabsPieces[indicesPiecesToSpawm[randPiece]], grid.gridNodes[j, 0].transform.position, Quaternion.identity, piecesParent);
 
-                    Debug.Log("Tiene pieza: " + grid.gridNodes[j, 0].GetPiece());
                     grid.gridNodes[j, 0].SetPieceOnNode(pieceToCreate);
                     pieceToCreate.myNode = grid.gridNodes[j, 0];
 
@@ -970,18 +1096,52 @@ public class PiecesManager : MonoBehaviour
         }
     }
 
-    void CalcVertValuesIndexDirectionStack(NodeGrid pieceNode)
+    #region AUTOMATCH INDEX COMPUTE
+    void CalculateVerticalIndexFromNode(NodeGrid pieceNode)
     {
         //Abajo
         SetDirectionsNodeAutoMatch(0, new Vector2(pieceNode.GetGridPos().x, pieceNode.GetGridPos().y + 1));
     }
-
-    void CalcHorzValuesIndexDirectionStack(NodeGrid pieceNode)
+    void CalculateHorizontalIndexFromNode(NodeGrid pieceNode)
     {
         //Derecha
         SetDirectionsNodeAutoMatch(1, new Vector2(pieceNode.GetGridPos().x + 1, pieceNode.GetGridPos().y));
     }
 
+    void SetDirectionsNodeAutoMatch(int directionIndex, Vector2 directionGrid)
+    {
+        if ((directionGrid.x >= 0 || directionGrid.x < piecesX)
+            && (directionGrid.y >= 0 || directionGrid.y < piecesY))
+        {
+            indexDirectionsAutomaticMatch[directionIndex] = directionGrid;
+        }
+    }
+    #endregion
+
+    #region PRE_MATCHES INDEX COMPUTE
+    void CalcNearVerticalNodeIndices(NodeGrid pieceNode)
+    {
+        //Abajo
+        SetDirectionsNodePreMatch(0, new Vector2(pieceNode.GetGridPos().x, pieceNode.GetGridPos().y + 1));
+    }
+    
+    void CalcNearHorizontalNodeIndices(NodeGrid pieceNode)
+    {
+        //Derecha
+        SetDirectionsNodePreMatch(1, new Vector2(pieceNode.GetGridPos().x + 1, pieceNode.GetGridPos().y));
+    }
+
+    void SetDirectionsNodePreMatch(int directionIndex, Vector2 directionGrid)
+    {
+        if ((directionGrid.x >= 0 || directionGrid.x < piecesX)
+            && (directionGrid.y >= 0 || directionGrid.y < piecesY))
+        {
+            indexDirectionsPreMatch[directionIndex] = directionGrid;
+        }
+    }
+    #endregion
+
+    #region PLAYER_MATCH INDEX COMPUTE
     void SaveDirectionsPiece(NodeGrid pieceNode)
     {
         //Arriba
@@ -1035,13 +1195,5 @@ public class PiecesManager : MonoBehaviour
             indexDirectionsPieceStack[directionIndex] = directionGrid;
         }
     }
-
-    void SetDirectionsNodeAutoMatch(int directionIndex, Vector2 directionGrid)
-    {
-        if ((directionGrid.x >= 0 || directionGrid.x < piecesX) 
-            && (directionGrid.y >= 0 || directionGrid.y < piecesY))
-        {
-            indexDirectionsAutomaticMatch[directionIndex] = directionGrid;
-        }
-    }
+    #endregion
 }
