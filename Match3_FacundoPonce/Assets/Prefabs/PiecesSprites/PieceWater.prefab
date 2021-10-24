@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8682110823192178270}
   - component: {fileID: 8682110823192178268}
   - component: {fileID: 8682110823192178266}
-  - component: {fileID: 8682110823192178269}
+  - component: {fileID: 1368273158397355849}
   m_Layer: 5
   m_Name: PieceWater
   m_TagString: Untagged
@@ -147,7 +147,8 @@ MonoBehaviour:
   pieceType: 1
   spawnAviable: 0
   myNode: {fileID: 0}
---- !u!114 &8682110823192178269
+  makingVerticalMove: 0
+--- !u!114 &1368273158397355849
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,7 +157,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8682110823192178241}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 162efb99e23916d42aaddcc761b86447, type: 3}
+  m_Script: {fileID: 11500000, guid: 83f70f53057832a47a8c1fcdfe732ea8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pieceAnimator: {fileID: 8682110823192178268}

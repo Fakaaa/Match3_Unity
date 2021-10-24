@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7128069304735424172}
   - component: {fileID: 7128069304735424174}
   - component: {fileID: 7128069304735424168}
-  - component: {fileID: 7128069304735424175}
+  - component: {fileID: 7408314737329919519}
   m_Layer: 5
   m_Name: PieceDark
   m_TagString: Untagged
@@ -147,7 +147,8 @@ MonoBehaviour:
   pieceType: 4
   spawnAviable: 1
   myNode: {fileID: 0}
---- !u!114 &7128069304735424175
+  makingVerticalMove: 0
+--- !u!114 &7408314737329919519
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,7 +157,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7128069304735424179}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 162efb99e23916d42aaddcc761b86447, type: 3}
+  m_Script: {fileID: 11500000, guid: 83f70f53057832a47a8c1fcdfe732ea8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pieceAnimator: {fileID: 7128069304735424174}

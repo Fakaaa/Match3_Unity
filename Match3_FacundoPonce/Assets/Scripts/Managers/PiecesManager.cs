@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PiecesManager : MonoBehaviour
 {
@@ -77,12 +76,12 @@ public class PiecesManager : MonoBehaviour
     Vector2[] indexDirectionsAutomaticMatch;
     Vector2[] indexDirectionsPreMatch;
 
-    public bool canMakeAutoMatch;
+    bool canMakeAutoMatch;
     public bool onMatchingProcess;
-    public bool autoSortGrid;
-    public int maxCallsToMakeAutoMatch;
-    public int callsOfMakeAutoMatch;
-    public int flagScoreIncrement;
+    bool autoSortGrid;
+    int maxCallsToMakeAutoMatch;
+    int callsOfMakeAutoMatch;
+    int flagScoreIncrement;
     int flagCheckForAutoMatches;
 
     int directions = 8;
@@ -100,7 +99,7 @@ public class PiecesManager : MonoBehaviour
     #region AUTO_SORT
 
     List<NodeGrid> nodesEmpty;
-    public bool createPiecesAfterSort;
+    bool createPiecesAfterSort;
 
     #endregion
 
@@ -660,7 +659,7 @@ public class PiecesManager : MonoBehaviour
         if (matchingPieces.Count <= 0)
             return false;
 
-        TestController peekPieceOnStack = matchingPieces.Peek().GetComponent<TestController>();
+        PieceHandler peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceHandler>();
         if (peekPieceOnStack == null || piece.gameObject.GetInstanceID() == peekPieceOnStack.gameObject.GetInstanceID())
             return false;
 
@@ -699,13 +698,13 @@ public class PiecesManager : MonoBehaviour
             if (matchingPieces.Count >= 1)
             {
                 //No Match!
-                TestController peekPieceOnStack = matchingPieces.Peek().GetComponent<TestController>();
+                PieceHandler peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceHandler>();
                 int actualMatchCount = matchingPieces.Count;
                 for (int i = 0; i < actualMatchCount; i++)
                 {
                     if(peekPieceOnStack != null)
                     {
-                        peekPieceOnStack = matchingPieces.Peek().GetComponent<TestController>();
+                        peekPieceOnStack = matchingPieces.Peek().GetComponent<PieceHandler>();
                         peekPieceOnStack.RemoveFromChain();
                         matchingPieces.Pop();
                         removePointStack?.Invoke();

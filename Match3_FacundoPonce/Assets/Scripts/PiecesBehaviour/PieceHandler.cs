@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class TestController : MonoBehaviour
+public class PieceHandler : MonoBehaviour
 {
     [SerializeField] Animator pieceAnimator;
 

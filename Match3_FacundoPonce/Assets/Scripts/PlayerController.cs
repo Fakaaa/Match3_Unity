@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
@@ -45,8 +42,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        TestController piece;
-        if (collision.TryGetComponent<TestController>(out piece))
+        PieceHandler piece;
+        if (collision.TryGetComponent<PieceHandler>(out piece))
         {
             piece.HoverAndChainPieces(draging);
         }
@@ -54,8 +51,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        TestController piece;
-        if (collision.TryGetComponent<TestController>(out piece))
+        PieceHandler piece;
+        if (collision.TryGetComponent<PieceHandler>(out piece))
         {
             if (Input.GetKey(KeyCode.Mouse0))
             {
@@ -69,8 +66,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        TestController piece;
-        if (collision.TryGetComponent<TestController>(out piece))
+        PieceHandler piece;
+        if (collision.TryGetComponent<PieceHandler>(out piece))
         {
             piece.ExitPieceHover();
         }

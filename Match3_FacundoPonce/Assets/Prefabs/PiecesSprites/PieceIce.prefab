@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7221466158613766505}
   - component: {fileID: 7221466158613766507}
   - component: {fileID: 7221466158613766509}
-  - component: {fileID: 7221466158613766506}
+  - component: {fileID: 7180448367577582256}
   m_Layer: 5
   m_Name: PieceIce
   m_TagString: Untagged
@@ -147,7 +147,8 @@ MonoBehaviour:
   pieceType: 7
   spawnAviable: 1
   myNode: {fileID: 0}
---- !u!114 &7221466158613766506
+  makingVerticalMove: 0
+--- !u!114 &7180448367577582256
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,7 +157,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7221466158613766518}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 162efb99e23916d42aaddcc761b86447, type: 3}
+  m_Script: {fileID: 11500000, guid: 83f70f53057832a47a8c1fcdfe732ea8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pieceAnimator: {fileID: 7221466158613766507}
